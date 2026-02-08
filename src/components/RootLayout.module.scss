@@ -1,0 +1,23 @@
+.header {
+  background: #ffffff !important;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0 24px !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px !important;
+  line-height: 64px !important;
+
+  @media (max-width: 768px) {
+    padding: 0 16px !important;
+  }
+}
+
+.content {
+  padding: 32px;
+  background: #f5f6f8;
+
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
+}
