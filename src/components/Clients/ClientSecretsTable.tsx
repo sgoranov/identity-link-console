@@ -1,6 +1,6 @@
 import React from 'react'
 import { Button, Card, Popconfirm, Table, Typography } from 'antd'
-import type { ColumnsType, SorterResult } from 'antd/es/table'
+import type { ColumnsType, SorterResult } from 'antd/es/table/interface'
 import type { ClientSecretRecord } from '../../api/clients/fetchClientSecrets'
 
 interface ClientSecretsTableProps {

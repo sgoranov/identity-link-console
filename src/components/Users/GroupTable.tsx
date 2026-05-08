@@ -1,6 +1,6 @@
 import React from 'react'
 import { Button, Card, Popconfirm, Table } from 'antd'
-import type { ColumnsType, SorterResult } from 'antd/es/table'
+import type { ColumnsType, SorterResult } from 'antd/es/table/interface'
 import type { Group } from '../../api/types'
 
 interface GroupTableProps {

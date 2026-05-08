@@ -3,7 +3,7 @@ import { Button, Card, Popconfirm, Table } from 'antd'
 import { getClientColumns } from './ClientTable.columns'
 import type { ClientRecord } from './ClientTable.columns'
 import type { Group } from '../../api/types'
-import type { SorterResult } from 'antd/es/table'
+import type { SorterResult } from 'antd/es/table/interface'
 
 interface ClientTableProps {
   clients: ClientRecord[]

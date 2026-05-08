@@ -1,14 +1,8 @@
-import { createRootRouteWithContext, createRoute } from '@tanstack/react-router'
+import { createRootRouteWithContext, createRoute, lazyRouteComponent } from '@tanstack/react-router'
 import type { QueryClient } from '@tanstack/react-query'
 import { Spin, Typography } from 'antd'
 import { fetchSession, sessionQueryKey } from './api/users/fetchSession'
 import RootLayout from './components/RootLayout'
-import HomePage from './pages/HomePage'
-import ClientsPage from './pages/ClientsPage'
-import UsersPage from './pages/UsersPage'
-import UserGroupsPage from './pages/UserGroupsPage'
-import ClientGroupsPage from './pages/ClientGroupsPage'
-import ClientSecretsPage from './pages/ClientSecretsPage'
 
 export type RouterContext = {
   queryClient: QueryClient
@@ -55,37 +49,37 @@ const rootRoute = createRootRouteWithContext<RouterContext>()({
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  component: HomePage,
+  component: lazyRouteComponent(() => import('./pages/HomePage')),
 })
 
 const clientsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/clients',
-  component: ClientsPage,
+  component: lazyRouteComponent(() => import('./pages/ClientsPage')),
 })
 
 const clientGroupsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/client-groups',
-  component: ClientGroupsPage,
+  component: lazyRouteComponent(() => import('./pages/ClientGroupsPage')),
 })
 
 const clientSecretsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/clients/$clientId/secrets',
-  component: ClientSecretsPage,
+  component: lazyRouteComponent(() => import('./pages/ClientSecretsPage')),
 })
 
 const usersRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/users',
-  component: UsersPage,
+  component: lazyRouteComponent(() => import('./pages/UsersPage')),
 })
 
 const userGroupsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/user-groups',
-  component: UserGroupsPage,
+  component: lazyRouteComponent(() => import('./pages/UserGroupsPage')),
 })
 
 export const routeTree = rootRoute.addChildren([

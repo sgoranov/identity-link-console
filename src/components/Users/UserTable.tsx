@@ -3,7 +3,7 @@ import { Table, Card, Popconfirm, Button } from 'antd';
 import { getUserColumns } from './UserTable.columns';
 import type { UserRecord } from './UserTable.columns';
 import type { Group } from "../../api/types.ts";
-import type { SorterResult } from 'antd/es/table';
+import type { SorterResult } from 'antd/es/table/interface';
 
 interface UserTableProps {
   users: UserRecord[];

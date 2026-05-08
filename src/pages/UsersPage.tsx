@@ -7,12 +7,13 @@ import { updateUser } from '../api/users/updateUser'
 import { fetchUsers, usersQueryKey } from '../api/users/fetchUsers'
 import { fetchGroups, groupsQueryKey } from '../api/users/fetchGroups'
 import { fetchUserGroups, userGroupsQueryKey } from '../api/users/fetchUserGroups'
-import type { QueryPayload, Group } from "../api/types.ts"
+import type { QueryPayload } from "../api/types.ts"
 import { UserTable } from "../components/Users/UserTable.tsx"
 import { UserFormDrawer, type UserFormValues } from "../components/Users/UserFormDrawer.tsx"
 import { showErrorNotification } from '../ui/notifications'
 import { useUser } from '../hooks/useUser'
 import { DEFAULT_PAGE_SIZE } from '../config'
+import type { Group } from '../api/types'
 
 const UsersPage = () => {
   const queryClient = useQueryClient()
@@ -207,7 +208,7 @@ const UsersPage = () => {
             lastName: user.lastName,
             email: user.email,
             grantTypes: user.grantTypes,
-            groups: userGroupsByUsername[user.username]?.map((group) => group.id) ?? [],
+            groups: userGroupsByUsername[user.username]?.map((group: Group) => group.id) ?? [],
           })
           setIsCreateOpen(true)
         }}

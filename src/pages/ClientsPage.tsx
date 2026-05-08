@@ -224,7 +224,7 @@ const ClientsPage = () => {
                 groups: values.groups,
                 grantTypes: values.grantTypes,
                 scopes: values.scopes,
-                isPublic: values.isPublic,
+                isPublic: Boolean(values.isPublic),
               })
               setPage(0)
               await queryClient.invalidateQueries({ queryKey: ['clients.list'] })
