@@ -31,14 +31,19 @@ const menuConfig = [
 ]
 
 const RootLayout = () => {
-  const { user } = useUser()
+  const { user, displayName, isAdmin, isLoading } = useUser()
   const { md } = useBreakpoint()
   const location = useLocation()
   const navigate = useNavigate()
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
-  const userInitial = user?.firstName?.[0] || 'G'
-  const fullName = user ? `${user.firstName} ${user.lastName}` : 'Guest'
+  const fullName =
+    displayName ??
+    (user ? `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() : '')
+  const userInitial = (fullName || user?.firstName || user?.lastName || '?')
+    .trim()
+    .slice(0, 1)
+    .toUpperCase()
 
   // Determine the default open sub-menu based on the current URL path
   const defaultOpenKeys = useMemo(() => {
@@ -65,8 +70,8 @@ const RootLayout = () => {
             </Typography.Title>
           </Link>
 
-          {/* DESKTOP MENU: Only shows on md and up */}
-          {md && (
+          {/* DESKTOP MENU: only show after we know admin status */}
+          {md && !isLoading && isAdmin && (
             <Menu
               mode="horizontal"
               selectedKeys={[location.pathname]}
@@ -79,7 +84,7 @@ const RootLayout = () => {
         </Space>
 
         <Space size="middle">
-          {!md && (
+          {!md && !isLoading && isAdmin && (
             <Button
               icon={<MenuOutlined />}
               type="text"
@@ -87,7 +92,7 @@ const RootLayout = () => {
             />
           )}
 
-          {md && <Typography.Text strong>{fullName}</Typography.Text>}
+          {md && fullName && <Typography.Text strong>{fullName}</Typography.Text>}
           <Avatar style={{ backgroundColor: '#1890ff' }}>{userInitial}</Avatar>
 
           {md && (

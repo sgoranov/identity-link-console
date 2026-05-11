@@ -21,3 +21,5 @@ export const DEFAULT_PAGE_SIZE = parsePositiveInt(
   import.meta.env.VITE_DEFAULT_PAGE_SIZE,
   10,
 )
+
+export const ADMINISTRATOR_GROUP = import.meta.env.VITE_ADMINISTRATOR_GROUP ?? 'administrator'

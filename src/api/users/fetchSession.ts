@@ -5,6 +5,9 @@ export interface SessionInfo {
   id: string
   access_token_present: boolean
   refresh_token_present: boolean
+
+  name?: string
+  email?: string
 }
 
 export const sessionQueryKey = () => ['users.session']
