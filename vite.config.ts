@@ -5,7 +5,18 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
-    allowedHosts: ['ui.example.com'],
+    host: true,
+    port: 9005,
+    strictPort: true,
+    // Allow local reverse-proxying (e.g. a proxy container reaching the host at host.docker.internal:9005)
+    // and the existing production-ish host.
+    allowedHosts: ['ui.example.com', 'host.docker.internal', 'localhost', '127.0.0.1'],
+  },
+  preview: {
+    host: true,
+    port: 9005,
+    strictPort: true,
+    allowedHosts: ['ui.example.com', 'host.docker.internal', 'localhost', '127.0.0.1'],
   },
   build: {
     chunkSizeWarningLimit: 1000,
