@@ -84,6 +84,7 @@ const ClientSecretsPage = () => {
 
   const clientName = clientQuery.data?.name ?? 'Client'
   const clientDescription = clientQuery.data?.description
+  const isSystemClient = Boolean(clientQuery.data?.isSystem)
 
   return (
     <Space orientation="vertical" size="large" style={{ width: '100%' }}>
@@ -94,6 +95,7 @@ const ClientSecretsPage = () => {
           <div style={{ display: 'flex', gap: 8 }}>
           <Button
             type="primary"
+            disabled={clientQuery.isLoading || isSystemClient}
             onClick={() => {
               setIsDrawerOpen(true)
             }}
@@ -119,6 +121,13 @@ const ClientSecretsPage = () => {
         isLoading={secretsQuery.isLoading}
         deletingId={deletingId}
         onDelete={async (secret) => {
+          if (secret.isSystem) {
+            showErrorNotification('System secrets cannot be deleted.', {
+              title: 'Delete secret blocked',
+            })
+            return
+          }
+
           setDeletingId(secret.id)
           try {
             await deleteClientSecret(secret.id)
@@ -216,6 +225,14 @@ const ClientSecretsPage = () => {
           setIsSubmitting(true)
           try {
             if (drawerMode === 'create') {
+              if (clientQuery.isLoading) {
+                throw new Error('Client details are still loading')
+              }
+
+              if (isSystemClient) {
+                throw new Error('System client secrets cannot be changed')
+              }
+
               if (!values.expirationPeriod) {
                 throw new Error('Expiration period is required')
               }

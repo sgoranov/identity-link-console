@@ -8,6 +8,7 @@ export type ClientSecretRecord = {
   passwordHint?: string | null
   expirationDateTime?: string | null
   expirationPeriod?: string | null
+  isSystem?: boolean
 }
 
 export const clientSecretsQueryKey = (clientId: string, payload: QueryPayload) => [
@@ -38,7 +39,7 @@ export const fetchClientSecrets = async (
     ...payload,
     joins: { c: 't.client' },
     query: 'c.id = :id',
-    parameters: { ...(payload.parameters ?? {}), id: clientId },
+    parameters: { ...payload.parameters, id: clientId },
   }
 
   const data = await fetchJson<QueryResponse<ClientSecretRecord>>(url, {

@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Button, Drawer, Form, Input, Select, Space } from 'antd'
+import { Button, Drawer, Form, Input, Select, Space, Switch } from 'antd'
 import { z } from 'zod'
 import type { Group } from '../../api/types'
 import { MAX_USER_GROUPS } from '../../config'
@@ -22,6 +22,7 @@ export type UserFormValues = {
   email: string
   grantTypes: string[]
   groups: string[]
+  twoFaEnabled: boolean
 }
 
 type UserFormMode = 'create' | 'edit'
@@ -113,6 +114,7 @@ export const UserFormDrawer = ({
       email: '',
       grantTypes: [...GRANT_TYPES],
       groups: [],
+      twoFaEnabled: false,
       ...initialValues,
     })
   }, [form, initialValues, open])
@@ -174,6 +176,9 @@ export const UserFormDrawer = ({
               value: group.id,
             }))}
           />
+        </Form.Item>
+        <Form.Item label="Two-factor authentication" name="twoFaEnabled" valuePropName="checked">
+          <Switch />
         </Form.Item>
         <Form.Item>
           <Space>

@@ -200,6 +200,13 @@ const UsersPage = () => {
           setOrderBy(nextOrderBy)
         }}
         onEdit={(user) => {
+          if (user.isSystem) {
+            showErrorNotification('System users cannot be edited.', {
+              title: 'Edit user blocked',
+            })
+            return
+          }
+
           setDrawerMode('edit')
           setSelectedUser({
             username: user.username,
@@ -209,10 +216,18 @@ const UsersPage = () => {
             email: user.email,
             grantTypes: user.grantTypes,
             groups: userGroupsByUsername[user.username]?.map((group: Group) => group.id) ?? [],
+            twoFaEnabled: Boolean(user.twoFaEnabled),
           })
           setIsCreateOpen(true)
         }}
         onDelete={async (user) => {
+          if (user.isSystem) {
+            showErrorNotification('System users cannot be deleted.', {
+              title: 'Delete user blocked',
+            })
+            return
+          }
+
           if (!currentUser?.id) {
             showErrorNotification('Unable to determine current user.', {
               title: 'Delete user blocked',
@@ -269,12 +284,16 @@ const UsersPage = () => {
             if (drawerMode === 'create') {
               await createUser(values)
             } else {
-              const targetId = users.find((user) => user.username === values.username)?.id
-              if (!targetId) {
+              const targetUser = users.find((user) => user.username === values.username)
+              if (!targetUser) {
                 throw new Error('Unable to locate user id for update')
               }
 
-              await updateUser(targetId, {
+              if (targetUser.isSystem) {
+                throw new Error('System users cannot be edited')
+              }
+
+              await updateUser(targetUser.id, {
                 ...values,
                 password: values.password || undefined,
               })

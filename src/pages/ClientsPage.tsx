@@ -24,7 +24,9 @@ const ClientsPage = () => {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [drawerMode, setDrawerMode] = useState<'create' | 'edit'>('create')
-  const [selectedClient, setSelectedClient] = useState<ClientFormValues & { id?: string } | null>(null)
+  const [selectedClient, setSelectedClient] = useState<
+    (ClientFormValues & { id?: string; isSystem?: boolean }) | null
+  >(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
@@ -135,9 +137,17 @@ const ClientsPage = () => {
           navigate({ to: '/clients/$clientId/secrets', params: { clientId: client.id } })
         }}
         onEdit={(client) => {
+          if (client.isSystem) {
+            showErrorNotification('System clients cannot be edited.', {
+              title: 'Edit client blocked',
+            })
+            return
+          }
+
           setDrawerMode('edit')
           setSelectedClient({
             id: client.id,
+            isSystem: client.isSystem,
             name: client.name,
             description: client.description ?? '',
             redirectUri: client.redirectUri ?? [],
@@ -149,6 +159,13 @@ const ClientsPage = () => {
           setIsDrawerOpen(true)
         }}
         onDelete={async (client) => {
+          if (client.isSystem) {
+            showErrorNotification('System clients cannot be deleted.', {
+              title: 'Delete client blocked',
+            })
+            return
+          }
+
           setDeletingId(client.id)
           try {
             await deleteClient(client.id)
@@ -234,6 +251,10 @@ const ClientsPage = () => {
 
             if (!selectedClient?.id) {
               throw new Error('No client selected for update')
+            }
+
+            if (selectedClient.isSystem) {
+              throw new Error('System clients cannot be edited')
             }
 
             await updateClient(selectedClient.id, {

@@ -13,6 +13,8 @@ export interface UserRecord {
     hasMore: boolean;
   };
   grantTypes: string[];
+  isSystem?: boolean;
+  twoFaEnabled?: boolean;
 }
 
 export const getUserColumns = (
@@ -27,7 +29,12 @@ export const getUserColumns = (
   {
     title: 'Name',
     key: 'name',
-    render: (_, record) => `${record.firstName} ${record.lastName}`,
+    render: (_, record) => (
+      <span>
+        {record.firstName} {record.lastName}
+        {record.isSystem ? <Tag style={{ marginInlineStart: 8 }}>System</Tag> : null}
+      </span>
+    ),
   },
   {
     title: 'Username',
@@ -42,6 +49,16 @@ export const getUserColumns = (
     key: 'email',
     sorter: true,
     sortOrder: sortOrderByField?.email,
+  },
+  {
+    title: '2FA',
+    dataIndex: 'twoFaEnabled',
+    key: 'twoFaEnabled',
+    render: (value: boolean | undefined) => (
+      <Typography.Text type={value ? undefined : 'secondary'}>
+        {value ? 'Enabled' : 'Disabled'}
+      </Typography.Text>
+    ),
   },
   {
     title: 'Groups',
@@ -90,7 +107,11 @@ export const getUserColumns = (
           key: 'actions',
           width: 1,
           render: (_: unknown, record: UserRecord) => (
-            <Button type="link" onClick={() => onEdit(record)}>
+            <Button
+              type="link"
+              disabled={Boolean(record.isSystem)}
+              onClick={() => onEdit(record)}
+            >
               Edit
             </Button>
           ),

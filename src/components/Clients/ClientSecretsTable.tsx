@@ -1,5 +1,5 @@
 import React from 'react'
-import { Button, Card, Popconfirm, Table, Typography } from 'antd'
+import { Button, Card, Popconfirm, Table, Tag, Typography } from 'antd'
 import type { ColumnsType, SorterResult } from 'antd/es/table/interface'
 import type { ClientSecretRecord } from '../../api/clients/fetchClientSecrets'
 
@@ -27,8 +27,12 @@ export const ClientSecretsTable: React.FC<ClientSecretsTableProps> = ({
       title: 'Password Hint',
       dataIndex: 'passwordHint',
       key: 'passwordHint',
-      render: (value: string | null | undefined) =>
-        value ? value : <Typography.Text type="secondary">-</Typography.Text>,
+      render: (value: string | null | undefined, record) => (
+        <span>
+          {value ? value : <Typography.Text type="secondary">-</Typography.Text>}
+          {record.isSystem ? <Tag style={{ marginInlineStart: 8 }}>System</Tag> : null}
+        </span>
+      ),
     },
     {
       title: 'Expires At',
@@ -53,7 +57,12 @@ export const ClientSecretsTable: React.FC<ClientSecretsTableProps> = ({
                 okButtonProps={{ danger: true }}
                 onConfirm={() => onDelete(record)}
               >
-                <Button type="link" danger loading={deletingId === record.id}>
+                <Button
+                  type="link"
+                  danger
+                  disabled={Boolean(record.isSystem)}
+                  loading={deletingId === record.id}
+                >
                   Delete
                 </Button>
               </Popconfirm>
@@ -70,6 +79,7 @@ export const ClientSecretsTable: React.FC<ClientSecretsTableProps> = ({
         columns={columns}
         loading={isLoading}
         rowKey="id"
+        rowClassName={(record) => (record.isSystem ? 'system-entity-row' : '')}
         pagination={false}
         scroll={{ x: 'max-content' }}
         onChange={(_pagination, _filters, sorter) => {

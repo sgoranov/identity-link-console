@@ -1,5 +1,5 @@
 import React from 'react'
-import { Button, Card, Popconfirm, Table } from 'antd'
+import { Button, Card, Popconfirm, Table, Tag } from 'antd'
 import type { ColumnsType, SorterResult } from 'antd/es/table/interface'
 import type { Group } from '../../api/types'
 
@@ -37,6 +37,12 @@ export const GroupTable: React.FC<GroupTableProps> = ({
       key: 'name',
       sorter: true,
       sortOrder: sortOrderByField?.name,
+      render: (value: string, record: Group) => (
+        <span>
+          {value}
+          {record.isSystem ? <Tag style={{ marginInlineStart: 8 }}>System</Tag> : null}
+        </span>
+      ),
     },
     ...(onEdit
       ? [
@@ -46,7 +52,11 @@ export const GroupTable: React.FC<GroupTableProps> = ({
             width: 1,
             render: (_: unknown, record: Group) => (
               <div style={{ display: 'flex', gap: 8 }}>
-                <Button type="link" onClick={() => onEdit(record)}>
+                <Button
+                  type="link"
+                  disabled={Boolean(record.isSystem)}
+                  onClick={() => onEdit(record)}
+                >
                   Edit
                 </Button>
                 {onDelete ? (
@@ -70,6 +80,7 @@ export const GroupTable: React.FC<GroupTableProps> = ({
                         okText="Delete"
                         okButtonProps={{ danger: true }}
                         onOpenChange={(open) => {
+                          if (record.isSystem) return
                           if (onDeleteOpenChange) onDeleteOpenChange(record, open)
                         }}
                         onConfirm={() => onDelete(record)}
@@ -77,6 +88,7 @@ export const GroupTable: React.FC<GroupTableProps> = ({
                         <Button
                           type="link"
                           danger
+                          disabled={Boolean(record.isSystem)}
                           loading={deletingId === record.id}
                         >
                           Delete
@@ -99,6 +111,7 @@ export const GroupTable: React.FC<GroupTableProps> = ({
         columns={columns}
         loading={isLoading}
         rowKey="id"
+        rowClassName={(record) => (record.isSystem ? 'system-entity-row' : '')}
         pagination={false}
         scroll={{ x: 'max-content' }}
         onChange={(_pagination, _filters, sorter) => {

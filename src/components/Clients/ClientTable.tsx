@@ -54,7 +54,11 @@ export const ClientTable: React.FC<ClientTableProps> = ({
       key: 'edit',
       width: 1,
       render: (_: unknown, record: ClientRecord) => (
-        <Button type="link" onClick={() => onEdit(record)}>
+        <Button
+          type="link"
+          disabled={Boolean(record.isSystem)}
+          onClick={() => onEdit(record)}
+        >
           Edit
         </Button>
       ),
@@ -74,7 +78,12 @@ export const ClientTable: React.FC<ClientTableProps> = ({
           okButtonProps={{ danger: true }}
           onConfirm={() => onDelete(record)}
         >
-          <Button type="link" danger loading={deletingId === record.id}>
+          <Button
+            type="link"
+            danger
+            disabled={Boolean(record.isSystem)}
+            loading={deletingId === record.id}
+          >
             Delete
           </Button>
         </Popconfirm>
@@ -93,6 +102,7 @@ export const ClientTable: React.FC<ClientTableProps> = ({
         columns={columnsWithActions}
         loading={isLoading}
         rowKey="id"
+        rowClassName={(record) => (record.isSystem ? 'system-entity-row' : '')}
         pagination={false}
         scroll={{ x: 'max-content' }}
         onChange={(_pagination, _filters, sorter) => {

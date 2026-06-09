@@ -14,6 +14,7 @@ export interface ClientRecord {
   grantTypes?: string[]
   scopes?: string[]
   public?: boolean
+  isSystem?: boolean
   secrets?: {
     data: string[]
     hasMore: boolean
@@ -33,6 +34,12 @@ export const getClientColumns = (
     key: 'name',
     sorter: true,
     sortOrder: sortOrderByField?.name,
+    render: (value: string, record) => (
+      <span>
+        {value}
+        {record.isSystem ? <Tag style={{ marginInlineStart: 8 }}>System</Tag> : null}
+      </span>
+    ),
   },
   {
     title: 'Client ID',

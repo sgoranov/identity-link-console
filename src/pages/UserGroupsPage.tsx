@@ -128,12 +128,20 @@ const UserGroupsPage = () => {
         groupUserCounts={groupUserCounts}
         groupUserCountsLoading={groupUserCountsLoading}
         onEdit={(group) => {
+          if (group.isSystem) {
+            showErrorNotification('System groups cannot be edited.', {
+              title: 'Edit group blocked',
+            })
+            return
+          }
+
           setDrawerMode('edit')
           setSelectedGroup(group)
           setIsDrawerOpen(true)
         }}
         onDeleteOpenChange={async (group, open) => {
           if (!open) return
+          if (group.isSystem) return
           if (groupUserCounts[group.id] || groupUserCountsLoading[group.id]) return
 
           setGroupUserCountsLoading((current) => ({ ...current, [group.id]: true }))
@@ -156,6 +164,13 @@ const UserGroupsPage = () => {
           }
         }}
         onDelete={async (group) => {
+          if (group.isSystem) {
+            showErrorNotification('System groups cannot be deleted.', {
+              title: 'Delete group blocked',
+            })
+            return
+          }
+
           setDeletingId(group.id)
           try {
             await deleteGroup(group.id)
@@ -231,6 +246,10 @@ const UserGroupsPage = () => {
 
             if (!selectedGroup) {
               throw new Error('No group selected for update')
+            }
+
+            if (selectedGroup.isSystem) {
+              throw new Error('System groups cannot be edited')
             }
 
             await updateGroup(selectedGroup.id, values)
