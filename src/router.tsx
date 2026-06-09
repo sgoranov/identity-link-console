@@ -92,7 +92,13 @@ const rootRoute = createRootRouteWithContext<RouterContext>()({
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  component: lazyRouteComponent(() => import('./pages/HomePage')),
+  component: lazyRouteComponent(() => import('./pages/ProfilePage')),
+})
+
+const profileRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/profile',
+  component: lazyRouteComponent(() => import('./pages/ProfilePage')),
 })
 
 // Administrative guard for restricted routes
@@ -172,6 +178,7 @@ const userGroupsRoute = createRoute({
 
 export const routeTree = rootRoute.addChildren([
   indexRoute,
+  profileRoute,
   clientsRoute,
   clientGroupsRoute,
   clientSecretsRoute,

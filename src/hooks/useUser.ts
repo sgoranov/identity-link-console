@@ -33,6 +33,7 @@ export const useUser = () => {
   return {
     session,
     user: userQuery.data,
+    groups: groupsQuery.data ?? [],
     displayName,
     isLoading: sessionQuery.isLoading || userQuery.isLoading || groupsQuery.isLoading,
     isLoggedIn: !!sessionQuery.data?.access_token_present,

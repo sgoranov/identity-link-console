@@ -1,15 +1,20 @@
 import { useState, useMemo } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from '@tanstack/react-router'
 import { Layout, Typography, Button, Space, Avatar, Grid, Menu, Drawer } from 'antd'
-import { MenuOutlined, UserOutlined, TeamOutlined } from '@ant-design/icons'
+import { MenuOutlined, ProfileOutlined, UserOutlined, TeamOutlined } from '@ant-design/icons'
 import { BFF_LOGOUT_URL } from '../auth/urls'
 import { useUser } from '../hooks/useUser'
 import styles from './RootLayout.module.scss'
 
 const { useBreakpoint } = Grid
 
-// New menu structure with nested items and icons
-const menuConfig = [
+const profileMenuItem = {
+  key: '/',
+  label: 'Profile',
+  icon: <ProfileOutlined />,
+}
+
+const adminMenuConfig = [
   {
     key: 'users',
     label: 'Users',
@@ -36,6 +41,11 @@ const RootLayout = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const selectedMenuKey = location.pathname === '/profile' ? '/' : location.pathname
+  const menuConfig = useMemo(
+    () => (isAdmin ? [profileMenuItem, ...adminMenuConfig] : [profileMenuItem]),
+    [isAdmin],
+  )
 
   const fullName =
     displayName ??
@@ -47,7 +57,7 @@ const RootLayout = () => {
 
   // Determine the default open sub-menu based on the current URL path
   const defaultOpenKeys = useMemo(() => {
-    for (const item of menuConfig) {
+    for (const item of adminMenuConfig) {
       if (item.children?.some((child) => child.key === location.pathname)) {
         return [item.key]
       }
@@ -71,10 +81,10 @@ const RootLayout = () => {
           </Link>
 
           {/* DESKTOP MENU: only show after we know admin status */}
-          {md && !isLoading && isAdmin && (
+          {md && !isLoading && (
             <Menu
               mode="horizontal"
-              selectedKeys={[location.pathname]}
+              selectedKeys={[selectedMenuKey]}
               defaultOpenKeys={defaultOpenKeys}
               items={menuConfig}
               onClick={handleMenuClick}
@@ -84,7 +94,7 @@ const RootLayout = () => {
         </Space>
 
         <Space size="middle">
-          {!md && !isLoading && isAdmin && (
+          {!md && !isLoading && (
             <Button
               icon={<MenuOutlined />}
               type="text"
@@ -115,11 +125,11 @@ const RootLayout = () => {
         bodyStyle={{ padding: 0 }}
       >
         <div style={{ padding: '16px' }}>
-            <Typography.Text strong>{fullName}</Typography.Text>
+          <Typography.Text strong>{fullName}</Typography.Text>
         </div>
         <Menu
           mode="inline"
-          selectedKeys={[location.pathname]}
+          selectedKeys={[selectedMenuKey]}
           defaultOpenKeys={defaultOpenKeys}
           items={menuConfig}
           onClick={handleMenuClick}
