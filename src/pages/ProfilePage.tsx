@@ -1,4 +1,4 @@
-import { Avatar, Descriptions, Result, Space, Spin, Tag, Typography } from 'antd'
+import { Descriptions, Result, Space, Spin, Tag, Typography } from 'antd'
 import { useUser } from '../hooks/useUser'
 
 const formatGrantType = (grantType: string) =>
@@ -16,11 +16,6 @@ const ProfilePage = () => {
   const fullName =
     displayName ??
     (user ? `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() : '')
-  const userInitial = (fullName || user?.username || '?')
-    .trim()
-    .slice(0, 1)
-    .toUpperCase()
-
   if (isLoading) {
     return (
       <Space orientation="vertical" size="large" style={{ width: '100%' }}>

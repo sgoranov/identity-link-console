@@ -36,9 +36,10 @@ const adminMenuConfig = [
 ]
 
 const RootLayout = () => {
-  const { user, displayName, isAdmin, isLoading } = useUser()
   const { md } = useBreakpoint()
   const location = useLocation()
+  const isPublicRoute = location.pathname === '/logout-success'
+  const { user, displayName, isAdmin, isLoading } = useUser({ enabled: !isPublicRoute })
   const navigate = useNavigate()
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const selectedMenuKey = location.pathname === '/profile' ? '/' : location.pathname
@@ -81,7 +82,7 @@ const RootLayout = () => {
           </Link>
 
           {/* DESKTOP MENU: only show after we know admin status */}
-          {md && !isLoading && (
+          {md && !isLoading && !isPublicRoute && (
             <Menu
               mode="horizontal"
               selectedKeys={[selectedMenuKey]}
@@ -93,6 +94,7 @@ const RootLayout = () => {
           )}
         </Space>
 
+        {!isPublicRoute && (
         <Space size="middle">
           {!md && !isLoading && (
             <Button
@@ -114,6 +116,7 @@ const RootLayout = () => {
             </Button>
           )}
         </Space>
+        )}
       </Layout.Header>
 
       {/* MOBILE DRAWER: Responsive menu */}

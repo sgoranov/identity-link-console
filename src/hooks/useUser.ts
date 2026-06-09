@@ -4,25 +4,32 @@ import { fetchCurrentUser, currentUserQueryKey } from '../api/users/fetchCurrent
 import { fetchUserGroups, userGroupsQueryKey } from '../api/users/fetchUserGroups'
 import { ADMINISTRATOR_GROUP } from '../config'
 
-export const useUser = () => {
+type UseUserOptions = {
+  enabled?: boolean
+}
+
+export const useUser = (options: UseUserOptions = {}) => {
+  const enabled = options.enabled ?? true
+
   // 1. Check if we have a session
   const sessionQuery = useQuery({
     queryKey: sessionQueryKey(),
     queryFn: fetchSession,
+    enabled,
   })
 
   // 2. Fetch current user data if we have an ID
   const userQuery = useQuery({
     queryKey: currentUserQueryKey(sessionQuery.data?.id),
     queryFn: () => fetchCurrentUser(sessionQuery.data!.id),
-    enabled: !!sessionQuery.data?.id, // Only run if we have an ID
+    enabled: enabled && !!sessionQuery.data?.id, // Only run if we have an ID
   })
 
   // 3. Fetch user groups to get their names for admin check
   const groupsQuery = useQuery({
     queryKey: userGroupsQueryKey(userQuery.data?.username ?? ''),
     queryFn: () => fetchUserGroups(userQuery.data!.username),
-    enabled: !!userQuery.data?.username,
+    enabled: enabled && !!userQuery.data?.username,
   })
 
   const isAdmin = groupsQuery.data?.some(g => g.name === ADMINISTRATOR_GROUP) ?? false
@@ -35,8 +42,8 @@ export const useUser = () => {
     user: userQuery.data,
     groups: groupsQuery.data ?? [],
     displayName,
-    isLoading: sessionQuery.isLoading || userQuery.isLoading || groupsQuery.isLoading,
-    isLoggedIn: !!sessionQuery.data?.access_token_present,
+    isLoading: enabled && (sessionQuery.isLoading || userQuery.isLoading || groupsQuery.isLoading),
+    isLoggedIn: enabled && !!sessionQuery.data?.access_token_present,
     isAdmin,
   }
 }

@@ -63,7 +63,11 @@ const rootRoute = createRootRouteWithContext<RouterContext>()({
     </div>
   ),
   // Global guard: verify the session and fetch user before rendering the layout
-  beforeLoad: async ({ context }) => {
+  beforeLoad: async ({ context, location }) => {
+    if (location.pathname === '/logout-success') {
+      return
+    }
+
     try {
       // 1. Ensure session exists
       const session = await context.queryClient.ensureQueryData({
@@ -99,6 +103,12 @@ const profileRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/profile',
   component: lazyRouteComponent(() => import('./pages/ProfilePage')),
+})
+
+const logoutSuccessRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/logout-success',
+  component: lazyRouteComponent(() => import('./pages/LogoutSuccessPage')),
 })
 
 // Administrative guard for restricted routes
@@ -179,6 +189,7 @@ const userGroupsRoute = createRoute({
 export const routeTree = rootRoute.addChildren([
   indexRoute,
   profileRoute,
+  logoutSuccessRoute,
   clientsRoute,
   clientGroupsRoute,
   clientSecretsRoute,
