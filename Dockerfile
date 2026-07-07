@@ -18,9 +18,14 @@ RUN npm run build
 
 
 FROM nginx:1.25-alpine AS prod
+RUN apk add --no-cache gettext
 
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
+
 COPY --from=builder /app/dist /usr/share/nginx/html/admin-console
 
 EXPOSE 9005
-CMD ["nginx", "-g", "daemon off;"]
+
+ENTRYPOINT ["/entrypoint.sh"]
