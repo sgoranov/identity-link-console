@@ -19,7 +19,7 @@ RUN npm run build
 
 FROM nginx:1.25-alpine AS prod
 
-RUN sed -i 's/listen       80;/listen       9005;/g' /etc/nginx/conf.d/default.conf
+COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /app/dist /usr/share/nginx/html/admin-console
 
 EXPOSE 9005
