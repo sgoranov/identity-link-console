@@ -5,10 +5,26 @@ import react from '@vitejs/plugin-react'
 export default defineConfig(({ mode }) => {
 
   const env = loadEnv(mode, process.cwd(), '')
-  let bffHost = env.VITE_BFF_BASE_URL
-  if (bffHost.startsWith('http://') || bffHost.startsWith('https://')) {
-    bffHost = new URL(bffHost).hostname
-  }
+
+  const bffHost = (() => {
+    const bffUrl = env.VITE_BFF_BASE_URL
+
+    if (!bffUrl) {
+      return undefined
+    }
+
+    try {
+      return new URL(bffUrl).hostname
+    } catch {
+      return bffUrl
+    }
+  })()
+
+  const allowedHosts: string[] = [
+    ...(bffHost ? [bffHost] : []),
+    'localhost',
+    '127.0.0.1',
+  ]
 
   return {
     plugins: [react()],
@@ -19,13 +35,13 @@ export default defineConfig(({ mode }) => {
       strictPort: true,
       // Allow local reverse-proxying (e.g. a proxy container reaching the host at host.docker.internal:9005)
       // and the existing production-ish host.
-      allowedHosts: [bffHost, 'localhost', '127.0.0.1'],
+      allowedHosts: allowedHosts,
     },
     preview: {
       host: true,
       port: 9005,
       strictPort: true,
-      allowedHosts: [bffHost, 'localhost', '127.0.0.1'],
+      allowedHosts: allowedHosts,
     },
     build: {
       chunkSizeWarningLimit: 1000,

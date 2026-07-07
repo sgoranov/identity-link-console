@@ -16,22 +16,6 @@ and manage client credentials.
 - Client secrets generation and rotation workflows
 - Search, sort, and pagination across listings
 
-## Configuration
-
-The console reads runtime configuration from Vite environment variables:
-
-- `VITE_BFF_BASE_URL` - Base URL for the BFF proxy (default: `/bff`)
-- `VITE_DEFAULT_PAGE_SIZE` - Default page size for list views
-- `VITE_MAX_USER_GROUPS` - Max groups per user selection
-- `VITE_MAX_CLIENT_GROUPS` - Max groups per client selection
-
-## Development
-
-```bash
-npm install
-npm run dev
-```
-
 ## License
 
 Identity Link is open source software licensed under the [MIT License](LICENSE), which permits reuse,
