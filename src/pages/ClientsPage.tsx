@@ -155,6 +155,7 @@ const ClientsPage = () => {
             grantTypes: client.grantTypes ?? [],
             scopes: client.scopes ?? [],
             isPublic: Boolean(client.public),
+            consentRequired: Boolean(client.consentRequired),
           })
           setIsDrawerOpen(true)
         }}
@@ -242,6 +243,7 @@ const ClientsPage = () => {
                 grantTypes: values.grantTypes,
                 scopes: values.scopes,
                 isPublic: Boolean(values.isPublic),
+                consentRequired: Boolean(values.consentRequired)
               })
               setPage(0)
               await queryClient.invalidateQueries({ queryKey: ['clients.list'] })
@@ -264,6 +266,7 @@ const ClientsPage = () => {
               groups: values.groups,
               grantTypes: values.grantTypes,
               scopes: values.scopes,
+              consentRequired: Boolean(values.consentRequired)
             })
             await queryClient.invalidateQueries({ queryKey: ['clients.list'] })
             setIsDrawerOpen(false)

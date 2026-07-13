@@ -15,6 +15,7 @@ export interface ClientRecord {
   scopes?: string[]
   public?: boolean
   isSystem?: boolean
+  consentRequired?: boolean
   secrets?: {
     data: string[]
     hasMore: boolean

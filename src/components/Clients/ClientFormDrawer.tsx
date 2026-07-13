@@ -28,6 +28,7 @@ export type ClientFormValues = {
   grantTypes: string[]
   scopes: string[]
   isPublic?: boolean
+  consentRequired?: boolean
 }
 
 type ClientFormMode = 'create' | 'edit'
@@ -180,6 +181,9 @@ export const ClientFormDrawer = ({
             <Switch />
           </Form.Item>
         ) : null}
+        <Form.Item label="Require Consent" name="consentRequired" valuePropName="checked">
+          <Switch />
+        </Form.Item>
         <Form.Item>
           <Space>
             <Button onClick={onClose}>Cancel</Button>
