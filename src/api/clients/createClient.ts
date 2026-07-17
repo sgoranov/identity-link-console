@@ -10,7 +10,11 @@ export type CreateClientPayload = {
   grantTypes: string[]
   scopes: string[]
   isPublic: boolean
-  consentRequired: boolean
+  consentRequired: boolean,
+  applicationUrl: string|null,
+  termsOfServiceUrl: string|null,
+  privacyPolicyUrl: string|null,
+  logoUrl: string|null,
 }
 
 export const createClient = async (payload: CreateClientPayload): Promise<ClientRecord> => {

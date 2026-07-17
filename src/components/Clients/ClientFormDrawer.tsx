@@ -29,6 +29,10 @@ export type ClientFormValues = {
   scopes: string[]
   isPublic?: boolean
   consentRequired?: boolean
+  applicationUrl: string
+  termsOfServiceUrl: string
+  privacyPolicyUrl: string
+  logoUrl: string
 }
 
 type ClientFormMode = 'create' | 'edit'
@@ -64,6 +68,14 @@ const redirectUriSchema = z
   )
   .min(1, 'At least one redirect URI is required')
   .max(50, 'You cannot specify more than 50 redirect URIs')
+
+const uriSchema = z.preprocess(
+  (value) => value === '' ? undefined : value,
+  z.string()
+    .max(3000, 'Redirect URI must be 3000 characters or less')
+    .url('URI must be valid')
+    .optional()
+);
 
 const groupsSchema = z
   .array(z.string())
@@ -183,6 +195,18 @@ export const ClientFormDrawer = ({
         ) : null}
         <Form.Item label="Require Consent" name="consentRequired" valuePropName="checked">
           <Switch />
+        </Form.Item>
+        <Form.Item label="Application URL" name="applicationUrl" rules={[makeZodRule(uriSchema)]}>
+          <Input autoComplete="off" />
+        </Form.Item>
+        <Form.Item label="Terms of Service URL" name="termsOfServiceUrl" rules={[makeZodRule(uriSchema)]}>
+          <Input autoComplete="off" />
+        </Form.Item>
+        <Form.Item label="Privaci Policy URL" name="privacyPolicyUrl" rules={[makeZodRule(uriSchema)]}>
+          <Input autoComplete="off" />
+        </Form.Item>
+        <Form.Item label="Logo URL" name="logoUrl" rules={[makeZodRule(uriSchema)]}>
+          <Input autoComplete="off" />
         </Form.Item>
         <Form.Item>
           <Space>

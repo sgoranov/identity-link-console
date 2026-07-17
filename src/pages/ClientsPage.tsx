@@ -156,6 +156,10 @@ const ClientsPage = () => {
             scopes: client.scopes ?? [],
             isPublic: Boolean(client.public),
             consentRequired: Boolean(client.consentRequired),
+            applicationUrl: client.applicationUrl ?? null,
+            termsOfServiceUrl: client.termsOfServiceUrl ?? null,
+            privacyPolicyUrl: client.privacyPolicyUrl ?? null,
+            logoUrl: client.logoUrl ?? null,
           })
           setIsDrawerOpen(true)
         }}
@@ -243,7 +247,11 @@ const ClientsPage = () => {
                 grantTypes: values.grantTypes,
                 scopes: values.scopes,
                 isPublic: Boolean(values.isPublic),
-                consentRequired: Boolean(values.consentRequired)
+                consentRequired: Boolean(values.consentRequired),
+                applicationUrl: values.applicationUrl || null,
+                termsOfServiceUrl: values.termsOfServiceUrl || null,
+                privacyPolicyUrl: values.privacyPolicyUrl || null,
+                logoUrl: values.logoUrl || null,
               })
               setPage(0)
               await queryClient.invalidateQueries({ queryKey: ['clients.list'] })
@@ -266,7 +274,11 @@ const ClientsPage = () => {
               groups: values.groups,
               grantTypes: values.grantTypes,
               scopes: values.scopes,
-              consentRequired: Boolean(values.consentRequired)
+              consentRequired: Boolean(values.consentRequired),
+              applicationUrl: values.applicationUrl || null,
+              termsOfServiceUrl: values.termsOfServiceUrl || null,
+              privacyPolicyUrl: values.privacyPolicyUrl || null,
+              logoUrl: values.logoUrl || null,
             })
             await queryClient.invalidateQueries({ queryKey: ['clients.list'] })
             setIsDrawerOpen(false)

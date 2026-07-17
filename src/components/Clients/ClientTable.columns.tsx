@@ -16,6 +16,10 @@ export interface ClientRecord {
   public?: boolean
   isSystem?: boolean
   consentRequired?: boolean
+  applicationUrl: string,
+  termsOfServiceUrl: string,
+  privacyPolicyUrl: string,
+  logoUrl: string,
   secrets?: {
     data: string[]
     hasMore: boolean
