@@ -3,6 +3,7 @@ import { Button, Drawer, Form, Input, Select, Space, Switch } from 'antd'
 import { z } from 'zod'
 import type { Group } from '../../api/types'
 import { MAX_CLIENT_GROUPS } from '../../config'
+import { m } from '../../paraglide/messages'
 
 const GRANT_TYPES = [
   'client_credentials',
@@ -13,11 +14,11 @@ const GRANT_TYPES = [
 ] as const
 
 const GRANT_TYPE_LABELS: Record<typeof GRANT_TYPES[number], string> = {
-  client_credentials: 'Client Credentials',
-  password: 'Password',
-  authorization_code: 'Authorization Code',
-  refresh_token: 'Refresh Token',
-  implicit: 'Implicit',
+  client_credentials: m.mainGrantClientCredentials(),
+  password: m.mainPassword(),
+  authorization_code: m.mainGrantAuthorizationCode(),
+  refresh_token: m.mainGrantRefreshToken(),
+  implicit: m.mainGrantImplicit(),
 }
 
 export type ClientFormValues = {
@@ -49,37 +50,37 @@ type ClientFormDrawerProps = {
 
 const nameSchema = z
   .string()
-  .min(1, 'Name is required')
-  .max(100, 'Name must be 100 characters or less')
-  .regex(/^([\w0-9_-])+$/u, 'Name can only include letters, numbers, "_" and "-"')
+  .min(1, m.validationNameRequired())
+  .max(100, m.validationNameMaxLength())
+  .regex(/^([\w0-9_-])+$/u, m.validationNamePattern())
 
 const descriptionSchema = z
   .string()
-  .min(1, 'Description is required')
-  .max(3000, 'Description must be 3000 characters or less')
+  .min(1, m.validationDescriptionRequired())
+  .max(3000, m.validationDescriptionMaxLength())
 
 const redirectUriSchema = z
   .array(
     z
       .string()
-      .min(1, 'Redirect URI is required')
-      .max(3000, 'Redirect URI must be 3000 characters or less')
-      .url('Redirect URI must be valid'),
+      .min(1, m.validationRedirectUriRequired())
+      .max(3000, m.validationRedirectUriMaxLength())
+      .url(m.validationRedirectUriValid()),
   )
-  .min(1, 'At least one redirect URI is required')
-  .max(50, 'You cannot specify more than 50 redirect URIs')
+  .min(1, m.validationAtLeastOneRedirectUriRequired())
+  .max(50, m.validationCannotSpecifyMoreThanRedirectUris())
 
 const uriSchema = z.preprocess(
   (value) => value === '' ? undefined : value,
   z.string()
-    .max(3000, 'Redirect URI must be 3000 characters or less')
-    .url('URI must be valid')
+    .max(3000, m.validationRedirectUriMaxLength())
+    .url(m.validationUriValid())
     .optional()
 );
 
 const groupsSchema = z
   .array(z.string())
-  .max(MAX_CLIENT_GROUPS, `You cannot specify more than ${MAX_CLIENT_GROUPS} groups`)
+  .max(MAX_CLIENT_GROUPS, m.validationCannotSpecifyMoreThanGroups({ max: MAX_CLIENT_GROUPS }))
 
 const grantTypesSchema = z.array(z.string())
 
@@ -97,7 +98,7 @@ const makeZodRule = (schema: z.ZodTypeAny) => ({
         : value ?? ''
     const result = schema.safeParse(valueToParse)
     if (result.success) return
-    throw new Error(result.error.issues[0]?.message ?? 'Invalid value')
+    throw new Error(result.error.issues[0]?.message ?? m.validationInvalidValue())
   },
 })
 
@@ -133,17 +134,17 @@ export const ClientFormDrawer = ({
     <Drawer
       open={open}
       width={520}
-      title={mode === 'create' ? 'Create client' : 'Edit client'}
+      title={mode === 'create' ? m.clientsCreate() : m.clientsEdit()}
       destroyOnClose
       forceRender
       onClose={onClose}
     >
       <Form layout="vertical" form={form} onFinish={onSubmit} autoComplete="off">
-        <Form.Item label="Name" name="name" required rules={[makeZodRule(nameSchema)]}>
+        <Form.Item label={m.mainName()} name="name" required rules={[makeZodRule(nameSchema)]}>
           <Input autoComplete="off" />
         </Form.Item>
         <Form.Item
-          label="Description"
+          label={m.mainDescription()}
           name="description"
           required
           rules={[makeZodRule(descriptionSchema)]}
@@ -151,7 +152,7 @@ export const ClientFormDrawer = ({
           <Input.TextArea rows={3} />
         </Form.Item>
         <Form.Item
-          label="Redirect URIs"
+          label={m.clientsFormRedirectUris()}
           name="redirectUri"
           required
           rules={[makeZodRule(redirectUriSchema)]}
@@ -159,16 +160,16 @@ export const ClientFormDrawer = ({
           <Select
             mode="tags"
             tokenSeparators={[',', ' ']}
-            placeholder="Add redirect URIs"
+            placeholder={m.clientsFormAddRedirectUris()}
           />
         </Form.Item>
-        <Form.Item label="Groups" name="groups" rules={[makeZodRule(groupsSchema)]}>
+        <Form.Item label={m.mainGroups()} name="groups" rules={[makeZodRule(groupsSchema)]}>
           <Select
             mode="multiple"
             allowClear
             showSearch
             optionFilterProp="label"
-            placeholder="Search groups"
+            placeholder={m.groupsSearch()}
             maxCount={MAX_CLIENT_GROUPS}
             options={availableGroups.map((group) => ({
               label: group.name,
@@ -176,8 +177,8 @@ export const ClientFormDrawer = ({
             }))}
           />
         </Form.Item>
-        <Form.Item label="Grant types" name="grantTypes" rules={[makeZodRule(grantTypesSchema)]}>
-          <Select mode="multiple" allowClear placeholder="Select grant types">
+        <Form.Item label={m.mainGrantTypes()} name="grantTypes" rules={[makeZodRule(grantTypesSchema)]}>
+          <Select mode="multiple" allowClear placeholder={m.clientsFormSelectGrantTypes()}>
             {GRANT_TYPES.map((gt) => (
               <Select.Option key={gt} value={gt}>
                 {GRANT_TYPE_LABELS[gt]}
@@ -185,34 +186,34 @@ export const ClientFormDrawer = ({
             ))}
           </Select>
         </Form.Item>
-        <Form.Item label="Scopes" name="scopes" rules={[makeZodRule(scopesSchema)]}>
-          <Select mode="tags" tokenSeparators={[',', ' ']} placeholder="Add scopes" />
+        <Form.Item label={m.clientsFormScopes()} name="scopes" rules={[makeZodRule(scopesSchema)]}>
+          <Select mode="tags" tokenSeparators={[',', ' ']} placeholder={m.clientsFormAddScopes()} />
         </Form.Item>
         {mode === 'create' ? (
-          <Form.Item label="Public client" name="isPublic" valuePropName="checked">
+          <Form.Item label={m.clientsFormPublicClient()} name="isPublic" valuePropName="checked">
             <Switch />
           </Form.Item>
         ) : null}
-        <Form.Item label="Require Consent" name="consentRequired" valuePropName="checked">
+        <Form.Item label={m.clientsFormConsentRequired()} name="consentRequired" valuePropName="checked">
           <Switch />
         </Form.Item>
-        <Form.Item label="Application URL" name="applicationUrl" rules={[makeZodRule(uriSchema)]}>
+        <Form.Item label={m.clientsFormApplicationUrl()} name="applicationUrl" rules={[makeZodRule(uriSchema)]}>
           <Input autoComplete="off" />
         </Form.Item>
-        <Form.Item label="Terms of Service URL" name="termsOfServiceUrl" rules={[makeZodRule(uriSchema)]}>
+        <Form.Item label={m.clientsFormTermsOfServiceUrl()} name="termsOfServiceUrl" rules={[makeZodRule(uriSchema)]}>
           <Input autoComplete="off" />
         </Form.Item>
-        <Form.Item label="Privaci Policy URL" name="privacyPolicyUrl" rules={[makeZodRule(uriSchema)]}>
+        <Form.Item label={m.clientsFormPrivacyPolicyUrl()} name="privacyPolicyUrl" rules={[makeZodRule(uriSchema)]}>
           <Input autoComplete="off" />
         </Form.Item>
-        <Form.Item label="Logo URL" name="logoUrl" rules={[makeZodRule(uriSchema)]}>
+        <Form.Item label={m.clientsFormLogoUrl()} name="logoUrl" rules={[makeZodRule(uriSchema)]}>
           <Input autoComplete="off" />
         </Form.Item>
         <Form.Item>
           <Space>
-            <Button onClick={onClose}>Cancel</Button>
+            <Button onClick={onClose}>{m.mainCancel()}</Button>
             <Button type="primary" htmlType="submit" loading={isSubmitting}>
-              {mode === 'create' ? 'Create client' : 'Save changes'}
+              {mode === 'create' ? m.clientsCreate() : m.mainSaveChanges()}
             </Button>
           </Space>
         </Form.Item>

@@ -7,6 +7,7 @@ import { updateProfile, type UpdateProfilePayload } from '../api/users/updatePro
 import { currentUserQueryKey } from '../api/users/fetchCurrentUser'
 import { sessionQueryKey } from '../api/users/fetchSession'
 import { showErrorNotification } from '../ui/notifications'
+import { m } from '../paraglide/messages'
 
 type ProfileFormValues = UpdateProfilePayload & {
   password: string
@@ -15,30 +16,30 @@ type ProfileFormValues = UpdateProfilePayload & {
 
 const firstNameSchema = z
   .string()
-  .min(1, 'First name is required')
-  .max(100, 'First name must be 100 characters or less')
+  .min(1, m.validationFirstNameRequired())
+  .max(100, m.validationFirstNameMaxLength())
 
 const lastNameSchema = z
   .string()
-  .min(1, 'Last name is required')
-  .max(100, 'Last name must be 100 characters or less')
+  .min(1, m.validationLastNameRequired())
+  .max(100, m.validationLastNameMaxLength())
 
 const emailSchema = z
   .string()
-  .min(1, 'Email is required')
-  .max(100, 'Email must be 100 characters or less')
-  .email('Email must be valid')
+  .min(1, m.validationEmailRequired())
+  .max(100, m.validationEmailMaxLength())
+  .email(m.validationEmailValid())
 
 const passwordSchema = z
   .string()
-  .min(1, 'Password is required')
-  .max(50, 'Password must be 50 characters or less')
+  .min(1, m.validationPasswordRequired())
+  .max(50, m.validationPasswordMaxLength())
 
 const makeZodRule = (schema: z.ZodTypeAny) => ({
   validator: async (_: unknown, value: unknown) => {
     const result = schema.safeParse(value ?? '')
     if (result.success) return
-    throw new Error(result.error.issues[0]?.message ?? 'Invalid value')
+    throw new Error(result.error.issues[0]?.message ?? m.validationInvalidValue())
   },
 })
 
@@ -47,7 +48,7 @@ const makeOptionalZodRule = (schema: z.ZodTypeAny) => ({
     if (value === undefined || value === '') return
     const result = schema.safeParse(value)
     if (result.success) return
-    throw new Error(result.error.issues[0]?.message ?? 'Invalid value')
+    throw new Error(result.error.issues[0]?.message ?? m.validationInvalidValue())
   },
 })
 
@@ -102,14 +103,14 @@ const ProfilePage = () => {
       await queryClient.invalidateQueries({ queryKey: currentUserQueryKey(session?.id) })
       await queryClient.invalidateQueries({ queryKey: sessionQueryKey() })
       notification.success({
-        message: 'Profile updated',
-        description: 'Your profile changes were saved.',
+        message: m.profileUpdated(),
+        description: m.profileChangesSaved(),
         placement: 'top',
       })
     } catch (error) {
       showErrorNotification(
-        error instanceof Error ? error.message : 'Unable to update profile',
-        { title: 'Unable to update profile' },
+        error instanceof Error ? error.message : m.profileUnableToUpdate(),
+        { title: m.profileUnableToUpdate() },
       )
     } finally {
       setIsSubmitting(false)
@@ -119,8 +120,8 @@ const ProfilePage = () => {
   if (isLoading) {
     return (
       <Space orientation="vertical" size="large" style={{ width: '100%' }}>
-        <Typography.Title level={2} style={{ margin: 0 }}>Profile</Typography.Title>
-        <Space><Spin /> <Typography.Text>Loading profile...</Typography.Text></Space>
+        <Typography.Title level={2} style={{ margin: 0 }}>{m.profileTitle()}</Typography.Title>
+        <Space><Spin /> <Typography.Text>{m.profileLoading()}</Typography.Text></Space>
       </Space>
     )
   }
@@ -128,11 +129,11 @@ const ProfilePage = () => {
   if (!session?.access_token_present) {
     return (
       <Space orientation="vertical" size="large" style={{ width: '100%' }}>
-        <Typography.Title level={2} style={{ margin: 0 }}>Profile</Typography.Title>
+        <Typography.Title level={2} style={{ margin: 0 }}>{m.profileTitle()}</Typography.Title>
         <Result
           status="warning"
-          title="No active session"
-          subTitle="Sign in to view your profile information."
+          title={m.profileNoActiveSession()}
+          subTitle={m.profileSignInToView()}
         />
       </Space>
     )
@@ -143,7 +144,7 @@ const ProfilePage = () => {
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
         <div>
           <Typography.Title level={2} style={{ margin: 0 }}>
-            {fullName || user?.username || 'Profile'}
+            {fullName || user?.username || m.profileTitle()}
           </Typography.Title>
           <Typography.Text type="secondary">
             {user?.email ?? session.email ?? user?.username ?? session.id}
@@ -154,14 +155,14 @@ const ProfilePage = () => {
       <Descriptions
         bordered
         column={{ xs: 1, sm: 1, md: 2 }}
-        title="Account"
+        title={m.profileAccount()}
       >
-        <Descriptions.Item label="User ID">{renderValue(user?.id ?? session.id)}</Descriptions.Item>
-        <Descriptions.Item label="Username">{renderValue(user?.username)}</Descriptions.Item>
-        <Descriptions.Item label="Role">
+        <Descriptions.Item label={m.profileUserId()}>{renderValue(user?.id ?? session.id)}</Descriptions.Item>
+        <Descriptions.Item label={m.mainUsername()}>{renderValue(user?.username)}</Descriptions.Item>
+        <Descriptions.Item label={m.profileRole()}>
           <Space>
-            {isAdmin && <Tag color="blue">Administrator</Tag>}
-            {isSystem ? <Tag color="purple">System User</Tag> : <Tag>Standard user</Tag>}
+            {isAdmin && <Tag color="blue">{m.profileAdministrator()}</Tag>}
+            {isSystem ? <Tag color="purple">{m.profileSystemUser()}</Tag> : <Tag>{m.profileStandardUser()}</Tag>}
           </Space>
         </Descriptions.Item>
       </Descriptions>
@@ -175,30 +176,30 @@ const ProfilePage = () => {
         disabled={isSystem}
       >
         <Typography.Title level={4} style={{ marginTop: 0 }}>
-          Profile details
+          {m.profileDetails()}
         </Typography.Title>
-        <Form.Item label="First name" name="firstName" required={!isSystem} rules={isSystem ? [] : [makeZodRule(firstNameSchema)]}>
+        <Form.Item label={m.mainFirstName()} name="firstName" required={!isSystem} rules={isSystem ? [] : [makeZodRule(firstNameSchema)]}>
           <Input />
         </Form.Item>
-        <Form.Item label="Last name" name="lastName" required={!isSystem} rules={isSystem ? [] : [makeZodRule(lastNameSchema)]}>
+        <Form.Item label={m.mainLastName()} name="lastName" required={!isSystem} rules={isSystem ? [] : [makeZodRule(lastNameSchema)]}>
           <Input />
         </Form.Item>
-        <Form.Item label="Email" name="email" required={!isSystem} rules={isSystem ? [] : [makeZodRule(emailSchema)]}>
+        <Form.Item label={m.mainEmail()} name="email" required={!isSystem} rules={isSystem ? [] : [makeZodRule(emailSchema)]}>
           <Input type="email" autoComplete="email" />
         </Form.Item>
 
         {!isSystem && (
           <>
             <Form.Item
-              label="New password"
+              label={m.profileNewPassword()}
               name="password"
               rules={[makeOptionalZodRule(passwordSchema)]}
-              extra="Leave blank to keep your current password."
+              extra={m.profileLeaveBlankToKeepPassword()}
             >
               <Input.Password autoComplete="new-password" />
             </Form.Item>
             <Form.Item
-              label="Confirm new password"
+              label={m.profileConfirmNewPassword()}
               name="passwordConfirm"
               dependencies={['password']}
               rules={[
@@ -206,9 +207,9 @@ const ProfilePage = () => {
                   validator: async (_: unknown, value: unknown) => {
                     const password = getFieldValue('password')
                     if (!password && !value) return
-                    if (!password) throw new Error('Enter a new password before confirming it')
-                    if (!value) throw new Error('Confirm your new password')
-                    if (value !== password) throw new Error('Passwords do not match')
+                    if (!password) throw new Error(m.profileEnterNewPasswordBeforeConfirming())
+                    if (!value) throw new Error(m.profileConfirmYourNewPassword())
+                    if (value !== password) throw new Error(m.profilePasswordsDoNotMatch())
                   },
                 }),
               ]}
@@ -218,14 +219,14 @@ const ProfilePage = () => {
           </>
         )}
 
-        <Form.Item label="Two-factor authentication" name="twoFaEnabled" valuePropName="checked">
+        <Form.Item label={m.mainTwoFactorAuthentication()} name="twoFaEnabled" valuePropName="checked">
           <Switch />
         </Form.Item>
 
         {!isSystem && (
           <Form.Item>
             <Button type="primary" htmlType="submit" loading={isSubmitting}>
-              Save changes
+              {m.mainSaveChanges()}
             </Button>
           </Form.Item>
         )}
@@ -234,9 +235,9 @@ const ProfilePage = () => {
       <Descriptions
         bordered
         column={1}
-        title="Access"
+        title={m.profileAccess()}
       >
-        <Descriptions.Item label="Groups">
+        <Descriptions.Item label={m.mainGroups()}>
           {groups.length > 0 ? (
             <Space wrap size={[4, 4]}>
               {groups.map((group) => (
@@ -249,7 +250,7 @@ const ProfilePage = () => {
             <Typography.Text type="secondary">-</Typography.Text>
           )}
         </Descriptions.Item>
-        <Descriptions.Item label="Grant types">
+        <Descriptions.Item label={m.mainGrantTypes()}>
           {user?.grantTypes?.length ? (
             <Space wrap size={[4, 4]}>
               {user.grantTypes.map((grantType) => (

@@ -12,6 +12,7 @@ import { ClientTable } from '../components/Clients/ClientTable'
 import { ClientFormDrawer, type ClientFormValues } from '../components/Clients/ClientFormDrawer'
 import { showErrorNotification } from '../ui/notifications'
 import { DEFAULT_PAGE_SIZE } from '../config'
+import { m } from '../paraglide/messages'
 
 const ClientsPage = () => {
   const queryClient = useQueryClient()
@@ -74,11 +75,11 @@ const ClientsPage = () => {
     return (
       <Space orientation="vertical" size="large" style={{ width: '100%' }}>
         <Typography.Title level={2} style={{ margin: 0 }}>
-          Clients
+          {m.clientsTitle()}
         </Typography.Title>
         <Space>
           <Spin />
-          <Typography.Text>Loading clients...</Typography.Text>
+          <Typography.Text>{m.clientsLoading()}</Typography.Text>
         </Space>
       </Space>
     )
@@ -88,15 +89,15 @@ const ClientsPage = () => {
     return (
       <Space orientation="vertical" size="large" style={{ width: '100%' }}>
         <Typography.Title level={2} style={{ margin: 0 }}>
-          Clients
+          {m.clientsTitle()}
         </Typography.Title>
         <Result
           status="error"
-          title="Unable to load clients"
+          title={m.clientsUnableToLoad()}
           subTitle={
             clientsQuery.error instanceof Error
               ? clientsQuery.error.message
-              : 'Unexpected error'
+              : m.mainUnexpectedError()
           }
         />
       </Space>
@@ -107,7 +108,7 @@ const ClientsPage = () => {
     <Space orientation="vertical" size="large" style={{ width: '100%' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Typography.Title level={2} style={{ margin: 0 }}>
-          Clients
+          {m.clientsTitle()}
         </Typography.Title>
         <Button
           type="primary"
@@ -117,12 +118,12 @@ const ClientsPage = () => {
             setIsDrawerOpen(true)
           }}
         >
-          Create client
+          {m.clientsCreate()}
         </Button>
       </div>
-      <Typography.Paragraph>Manage OAuth/OIDC clients here.</Typography.Paragraph>
+      <Typography.Paragraph>{m.clientsDescription()}</Typography.Paragraph>
       <Input
-        placeholder="Search clients by name"
+        placeholder={m.clientsSearchByName()}
         value={searchInput}
         allowClear
         onChange={(event) => setSearchInput(event.target.value)}
@@ -138,8 +139,8 @@ const ClientsPage = () => {
         }}
         onEdit={(client) => {
           if (client.isSystem) {
-            showErrorNotification('System clients cannot be edited.', {
-              title: 'Edit client blocked',
+            showErrorNotification(m.clientsSystemCannotBeEditedWithPeriod(), {
+              title: m.clientsEditBlocked(),
             })
             return
           }
@@ -165,8 +166,8 @@ const ClientsPage = () => {
         }}
         onDelete={async (client) => {
           if (client.isSystem) {
-            showErrorNotification('System clients cannot be deleted.', {
-              title: 'Delete client blocked',
+            showErrorNotification(m.clientsSystemCannotBeDeleted(), {
+              title: m.clientsDeleteBlocked(),
             })
             return
           }
@@ -178,8 +179,8 @@ const ClientsPage = () => {
             await queryClient.invalidateQueries({ queryKey: ['clients.list'] })
           } catch (error) {
             showErrorNotification(
-              error instanceof Error ? error.message : 'Unable to delete client',
-              { title: 'Unable to delete client' },
+              error instanceof Error ? error.message : m.clientsUnableToDelete(),
+              { title: m.clientsUnableToDelete() },
             )
           } finally {
             setDeletingId(null)
@@ -219,13 +220,13 @@ const ClientsPage = () => {
           onClick={() => setPage((current) => Math.max(0, current - 1))}
           disabled={page === 0 || clientsQuery.isFetching}
         >
-          Previous
+          {m.mainPrevious()}
         </Button>
         <Button
           onClick={() => setPage((current) => current + 1)}
           disabled={!clientsQuery.data?.hasMore || clientsQuery.isFetching}
         >
-          Next
+          {m.mainNext()}
         </Button>
       </div>
       <ClientFormDrawer
@@ -260,11 +261,11 @@ const ClientsPage = () => {
             }
 
             if (!selectedClient?.id) {
-              throw new Error('No client selected for update')
+              throw new Error(m.clientsNoSelectedForUpdate())
             }
 
             if (selectedClient.isSystem) {
-              throw new Error('System clients cannot be edited')
+              throw new Error(m.clientsSystemCannotBeEdited())
             }
 
             await updateClient(selectedClient.id, {
@@ -284,8 +285,8 @@ const ClientsPage = () => {
             setIsDrawerOpen(false)
           } catch (error) {
             showErrorNotification(
-              error instanceof Error ? error.message : 'Unable to save client',
-              { title: 'Unable to save client' },
+              error instanceof Error ? error.message : m.clientsUnableToSave(),
+              { title: m.clientsUnableToSave() },
             )
           } finally {
             setIsSubmitting(false)

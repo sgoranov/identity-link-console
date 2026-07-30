@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Button, Drawer, Form, Input, Space } from 'antd'
 import { z } from 'zod'
+import { m } from '../../paraglide/messages'
 
 export type GroupFormValues = {
   name: string
@@ -19,14 +20,14 @@ type GroupFormDrawerProps = {
 
 const nameSchema = z
   .string()
-  .min(1, 'Name is required')
-  .max(100, 'Name must be 100 characters or less')
+  .min(1, m.validationNameRequired())
+  .max(100, m.validationNameMaxLength())
 
 const makeZodRule = (schema: z.ZodTypeAny) => ({
   validator: async (_: unknown, value: unknown) => {
     const result = schema.safeParse(value ?? '')
     if (result.success) return
-    throw new Error(result.error.issues[0]?.message ?? 'Invalid value')
+    throw new Error(result.error.issues[0]?.message ?? m.validationInvalidValue())
   },
 })
 
@@ -56,7 +57,7 @@ export const GroupFormDrawer = ({
     <Drawer
       open={open}
       width={420}
-      title={mode === 'create' ? 'Create group' : 'Edit group'}
+      title={mode === 'create' ? m.groupsCreate() : m.groupsEdit()}
       destroyOnClose
       forceRender
       onClose={onClose}
@@ -67,14 +68,14 @@ export const GroupFormDrawer = ({
         onFinish={onSubmit}
         autoComplete="off"
       >
-        <Form.Item label="Name" name="name" required rules={[makeZodRule(nameSchema)]}>
+        <Form.Item label={m.mainName()} name="name" required rules={[makeZodRule(nameSchema)]}>
           <Input autoComplete="off" />
         </Form.Item>
         <Form.Item>
           <Space>
-            <Button onClick={onClose}>Cancel</Button>
+            <Button onClick={onClose}>{m.mainCancel()}</Button>
             <Button type="primary" htmlType="submit" loading={isSubmitting}>
-              {mode === 'create' ? 'Create group' : 'Save changes'}
+              {mode === 'create' ? m.groupsCreate() : m.mainSaveChanges()}
             </Button>
           </Space>
         </Form.Item>

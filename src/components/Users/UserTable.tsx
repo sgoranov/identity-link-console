@@ -4,6 +4,7 @@ import { getUserColumns } from './UserTable.columns';
 import type { UserRecord } from './UserTable.columns';
 import type { Group } from "../../api/types.ts";
 import type { SorterResult } from 'antd/es/table/interface';
+import { m } from '../../paraglide/messages'
 
 interface UserTableProps {
   users: UserRecord[];
@@ -49,9 +50,9 @@ export const UserTable: React.FC<UserTableProps> = ({
         render: (_: unknown, record: UserRecord) => (
           record.id === currentUserId ? null : (
             <Popconfirm
-              title="Delete user?"
-              description="This deletion is permanent."
-              okText="Delete"
+              title={m.usersDeleteQuestion()}
+              description={m.mainDeletionPermanent()}
+              okText={m.mainDelete()}
               okButtonProps={{ danger: true }}
               onConfirm={() => onDelete(record)}
             >
@@ -61,7 +62,7 @@ export const UserTable: React.FC<UserTableProps> = ({
                 danger
                 loading={deletingId === record.id}
               >
-                Delete
+                {m.mainDelete()}
               </Button>
             </Popconfirm>
           )

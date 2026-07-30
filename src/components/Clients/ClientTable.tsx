@@ -4,6 +4,7 @@ import { getClientColumns } from './ClientTable.columns'
 import type { ClientRecord } from './ClientTable.columns'
 import type { Group } from '../../api/types'
 import type { SorterResult } from 'antd/es/table/interface'
+import { m } from '../../paraglide/messages'
 
 interface ClientTableProps {
   clients: ClientRecord[]
@@ -42,7 +43,7 @@ export const ClientTable: React.FC<ClientTableProps> = ({
       width: 1,
       render: (_: unknown, record: ClientRecord) => (
         <Button type="link" onClick={() => onViewSecrets(record)}>
-          Secrets
+          {m.clientsSecretsAction()}
         </Button>
       ),
     })
@@ -59,7 +60,7 @@ export const ClientTable: React.FC<ClientTableProps> = ({
           disabled={Boolean(record.isSystem)}
           onClick={() => onEdit(record)}
         >
-          Edit
+          {m.mainEdit()}
         </Button>
       ),
     })
@@ -72,9 +73,9 @@ export const ClientTable: React.FC<ClientTableProps> = ({
       width: 1,
       render: (_: unknown, record: ClientRecord) => (
         <Popconfirm
-          title="Delete client?"
-          description="This deletion is permanent."
-          okText="Delete"
+          title={m.clientsDeleteQuestion()}
+          description={m.mainDeletionPermanent()}
+          okText={m.mainDelete()}
           okButtonProps={{ danger: true }}
           onConfirm={() => onDelete(record)}
         >
@@ -84,7 +85,7 @@ export const ClientTable: React.FC<ClientTableProps> = ({
             disabled={Boolean(record.isSystem)}
             loading={deletingId === record.id}
           >
-            Delete
+            {m.mainDelete()}
           </Button>
         </Popconfirm>
       ),

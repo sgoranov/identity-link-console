@@ -2,6 +2,7 @@ import React from 'react'
 import { Button, Card, Popconfirm, Table, Tag, Typography } from 'antd'
 import type { ColumnsType, SorterResult } from 'antd/es/table/interface'
 import type { ClientSecretRecord } from '../../api/clients/fetchClientSecrets'
+import { m } from '../../paraglide/messages'
 
 interface ClientSecretsTableProps {
   secrets: ClientSecretRecord[]
@@ -24,24 +25,24 @@ export const ClientSecretsTable: React.FC<ClientSecretsTableProps> = ({
 }) => {
   const columns: ColumnsType<ClientSecretRecord> = [
     {
-      title: 'Password Hint',
+      title: m.clientSecretsPasswordHint(),
       dataIndex: 'passwordHint',
       key: 'passwordHint',
       render: (value: string | null | undefined, record) => (
         <span>
           {value ? value : <Typography.Text type="secondary">-</Typography.Text>}
-          {record.isSystem ? <Tag style={{ marginInlineStart: 8 }}>System</Tag> : null}
+          {record.isSystem ? <Tag style={{ marginInlineStart: 8 }}>{m.mainSystem()}</Tag> : null}
         </span>
       ),
     },
     {
-      title: 'Expires At',
+      title: m.clientSecretsTableExpiresAt(),
       dataIndex: 'expirationDateTime',
       key: 'expirationDateTime',
       sorter: true,
       sortOrder: sortOrderByField?.expirationDateTime,
       render: (value: string | null | undefined) =>
-        value ? value : <Typography.Text type="secondary">Never</Typography.Text>,
+        value ? value : <Typography.Text type="secondary">{m.clientSecretsNever()}</Typography.Text>,
     },
     ...(onDelete
       ? [
@@ -51,9 +52,9 @@ export const ClientSecretsTable: React.FC<ClientSecretsTableProps> = ({
             width: 1,
             render: (_: unknown, record: ClientSecretRecord) => (
               <Popconfirm
-                title="Delete secret?"
-                description="This deletion is permanent."
-                okText="Delete"
+                title={m.clientSecretsDeleteQuestion()}
+                description={m.mainDeletionPermanent()}
+                okText={m.mainDelete()}
                 okButtonProps={{ danger: true }}
                 onConfirm={() => onDelete(record)}
               >
@@ -63,7 +64,7 @@ export const ClientSecretsTable: React.FC<ClientSecretsTableProps> = ({
                   disabled={Boolean(record.isSystem)}
                   loading={deletingId === record.id}
                 >
-                  Delete
+                  {m.mainDelete()}
                 </Button>
               </Popconfirm>
             ),

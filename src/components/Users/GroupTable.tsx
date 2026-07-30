@@ -2,6 +2,7 @@ import React from 'react'
 import { Button, Card, Popconfirm, Table, Tag } from 'antd'
 import type { ColumnsType, SorterResult } from 'antd/es/table/interface'
 import type { Group } from '../../api/types'
+import { m } from '../../paraglide/messages'
 
 interface GroupTableProps {
   groups: Group[]
@@ -32,7 +33,7 @@ export const GroupTable: React.FC<GroupTableProps> = ({
 }) => {
   const columns: ColumnsType<Group> = [
     {
-      title: 'Name',
+      title: m.mainName(),
       dataIndex: 'name',
       key: 'name',
       sorter: true,
@@ -40,7 +41,7 @@ export const GroupTable: React.FC<GroupTableProps> = ({
       render: (value: string, record: Group) => (
         <span>
           {value}
-          {record.isSystem ? <Tag style={{ marginInlineStart: 8 }}>System</Tag> : null}
+          {record.isSystem ? <Tag style={{ marginInlineStart: 8 }}>{m.mainSystem()}</Tag> : null}
         </span>
       ),
     },
@@ -57,7 +58,7 @@ export const GroupTable: React.FC<GroupTableProps> = ({
                   disabled={Boolean(record.isSystem)}
                   onClick={() => onEdit(record)}
                 >
-                  Edit
+                  {m.mainEdit()}
                 </Button>
                 {onDelete ? (
                   (() => {
@@ -68,16 +69,16 @@ export const GroupTable: React.FC<GroupTableProps> = ({
                       : '0'
                     const isLoadingCount = groupUserCountsLoading?.[record.id]
                     const usageText = isLoadingCount
-                      ? 'Checking usage...'
+                      ? m.mainCheckingUsage()
                       : countInfo
-                        ? `This group is assigned to ${countText} users.`
-                        : 'This group is not assigned to any users.'
+                        ? m.userGroupsAssignedToUsers({ count: countText })
+                        : m.userGroupsNotAssignedToUsers()
 
                     return (
                       <Popconfirm
-                        title="Delete group?"
-                        description={`This deletion is permanent. ${usageText}`}
-                        okText="Delete"
+                        title={m.groupsDeleteQuestion()}
+                        description={m.groupsDeletionPermanentWithUsage({ usage: usageText })}
+                        okText={m.mainDelete()}
                         okButtonProps={{ danger: true }}
                         onOpenChange={(open) => {
                           if (record.isSystem) return
@@ -91,7 +92,7 @@ export const GroupTable: React.FC<GroupTableProps> = ({
                           disabled={Boolean(record.isSystem)}
                           loading={deletingId === record.id}
                         >
-                          Delete
+                          {m.mainDelete()}
                         </Button>
                       </Popconfirm>
                     )

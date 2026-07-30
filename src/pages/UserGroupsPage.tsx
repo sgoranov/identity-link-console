@@ -11,6 +11,7 @@ import { GroupFormDrawer, type GroupFormValues } from '../components/Users/Group
 import { GroupTable } from '../components/Users/GroupTable'
 import { showErrorNotification } from '../ui/notifications'
 import { DEFAULT_PAGE_SIZE } from '../config'
+import { m } from '../paraglide/messages'
 
 const UserGroupsPage = () => {
   const queryClient = useQueryClient()
@@ -65,11 +66,11 @@ const UserGroupsPage = () => {
     return (
       <Space orientation="vertical" size="large" style={{ width: '100%' }}>
         <Typography.Title level={2} style={{ margin: 0 }}>
-          User Groups
+          {m.userGroupsTitle()}
         </Typography.Title>
         <Space>
           <Spin />
-          <Typography.Text>Loading groups...</Typography.Text>
+          <Typography.Text>{m.groupsLoading()}</Typography.Text>
         </Space>
       </Space>
     )
@@ -79,15 +80,15 @@ const UserGroupsPage = () => {
     return (
       <Space orientation="vertical" size="large" style={{ width: '100%' }}>
         <Typography.Title level={2} style={{ margin: 0 }}>
-          User Groups
+          {m.userGroupsTitle()}
         </Typography.Title>
         <Result
           status="error"
-          title="Unable to load groups"
+          title={m.groupsUnableToLoad()}
           subTitle={
             groupsQuery.error instanceof Error
               ? groupsQuery.error.message
-              : 'Unexpected error'
+              : m.mainUnexpectedError()
           }
         />
       </Space>
@@ -98,7 +99,7 @@ const UserGroupsPage = () => {
     <Space orientation="vertical" size="large" style={{ width: '100%' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Typography.Title level={2} style={{ margin: 0 }}>
-          User Groups
+          {m.userGroupsTitle()}
         </Typography.Title>
         <Button
           type="primary"
@@ -108,14 +109,14 @@ const UserGroupsPage = () => {
             setIsDrawerOpen(true)
           }}
         >
-          Create group
+          {m.groupsCreate()}
         </Button>
       </div>
       <Typography.Paragraph>
-        Manage and review group access across your organization.
+        {m.userGroupsDescription()}
       </Typography.Paragraph>
       <Input
-        placeholder="Search groups by name"
+        placeholder={m.groupsSearchByName()}
         value={searchInput}
         allowClear
         onChange={(event) => setSearchInput(event.target.value)}
@@ -129,8 +130,8 @@ const UserGroupsPage = () => {
         groupUserCountsLoading={groupUserCountsLoading}
         onEdit={(group) => {
           if (group.isSystem) {
-            showErrorNotification('System groups cannot be edited.', {
-              title: 'Edit group blocked',
+            showErrorNotification(m.groupsSystemCannotBeEditedWithPeriod(), {
+              title: m.groupsEditBlocked(),
             })
             return
           }
@@ -153,8 +154,8 @@ const UserGroupsPage = () => {
             }))
           } catch (error) {
             showErrorNotification(
-              error instanceof Error ? error.message : 'Unable to check group usage',
-              { title: 'Unable to check group usage' },
+              error instanceof Error ? error.message : m.groupsUnableToCheckUsage(),
+              { title: m.groupsUnableToCheckUsage() },
             )
           } finally {
             setGroupUserCountsLoading((current) => ({
@@ -165,8 +166,8 @@ const UserGroupsPage = () => {
         }}
         onDelete={async (group) => {
           if (group.isSystem) {
-            showErrorNotification('System groups cannot be deleted.', {
-              title: 'Delete group blocked',
+            showErrorNotification(m.groupsSystemCannotBeDeleted(), {
+              title: m.groupsDeleteBlocked(),
             })
             return
           }
@@ -178,8 +179,8 @@ const UserGroupsPage = () => {
             await queryClient.invalidateQueries({ queryKey: ['groups.list'] })
           } catch (error) {
             showErrorNotification(
-              error instanceof Error ? error.message : 'Unable to delete group',
-              { title: 'Unable to delete group' },
+              error instanceof Error ? error.message : m.groupsUnableToDelete(),
+              { title: m.groupsUnableToDelete() },
             )
           } finally {
             setDeletingId(null)
@@ -218,13 +219,13 @@ const UserGroupsPage = () => {
           onClick={() => setPage((current) => Math.max(0, current - 1))}
           disabled={page === 0 || groupsQuery.isFetching}
         >
-          Previous
+          {m.mainPrevious()}
         </Button>
         <Button
           onClick={() => setPage((current) => current + 1)}
           disabled={!groupsQuery.data?.hasMore || groupsQuery.isFetching}
         >
-          Next
+          {m.mainNext()}
         </Button>
       </div>
       <GroupFormDrawer
@@ -245,11 +246,11 @@ const UserGroupsPage = () => {
             }
 
             if (!selectedGroup) {
-              throw new Error('No group selected for update')
+              throw new Error(m.groupsNoSelectedForUpdate())
             }
 
             if (selectedGroup.isSystem) {
-              throw new Error('System groups cannot be edited')
+              throw new Error(m.groupsSystemCannotBeEdited())
             }
 
             await updateGroup(selectedGroup.id, values)
@@ -257,8 +258,8 @@ const UserGroupsPage = () => {
             setIsDrawerOpen(false)
           } catch (error) {
             const errorMessage =
-              error instanceof Error ? error.message : 'Unable to save group'
-            showErrorNotification(errorMessage, { title: 'Unable to save group' })
+              error instanceof Error ? error.message : m.groupsUnableToSave()
+            showErrorNotification(errorMessage, { title: m.groupsUnableToSave() })
           } finally {
             setIsSubmitting(false)
           }

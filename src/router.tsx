@@ -5,6 +5,7 @@ import { fetchSession, sessionQueryKey } from './api/users/fetchSession'
 import { fetchCurrentUser, currentUserQueryKey } from './api/users/fetchCurrentUser'
 import { fetchUserGroups, userGroupsQueryKey } from './api/users/fetchUserGroups'
 import { ADMINISTRATOR_GROUP } from './config'
+import { m } from './paraglide/messages'
 // Vite dev server can occasionally get into a bad HMR/cached state where it thinks a module
 // doesn't have a default export (even when it does). Importing the namespace avoids a hard
 // ESM linking error that would otherwise blank the page.
@@ -38,7 +39,7 @@ const rootRoute = createRootRouteWithContext<RouterContext>()({
           IdentityLink
         </Typography.Title>
         <Typography.Paragraph type="secondary">
-          Failed to load the main layout. Please restart the dev server and clear Vite cache.
+          {m.layoutLoadFailed()}
         </Typography.Paragraph>
         <div style={{ marginTop: 16 }}>
           <Outlet />
@@ -59,7 +60,7 @@ const rootRoute = createRootRouteWithContext<RouterContext>()({
       }}
     >
       <Spin size="large" />
-      <Typography.Text type="secondary">Verifying session...</Typography.Text>
+      <Typography.Text type="secondary">{m.layoutVerifyingSession()}</Typography.Text>
     </div>
   ),
   // Global guard: verify the session and fetch user before rendering the layout

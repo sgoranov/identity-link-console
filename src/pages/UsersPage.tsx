@@ -14,6 +14,7 @@ import { showErrorNotification } from '../ui/notifications'
 import { useUser } from '../hooks/useUser'
 import { DEFAULT_PAGE_SIZE } from '../config'
 import type { Group } from '../api/types'
+import { m } from '../paraglide/messages'
 
 const UsersPage = () => {
   const queryClient = useQueryClient()
@@ -104,8 +105,8 @@ const UsersPage = () => {
   if (usersQuery.isLoading) {
     return (
       <Space orientation="vertical" size="large" style={{ width: '100%' }}>
-        <Typography.Title level={2} style={{ margin: 0 }}>Users</Typography.Title>
-        <Space><Spin /> <Typography.Text>Loading users…</Typography.Text></Space>
+        <Typography.Title level={2} style={{ margin: 0 }}>{m.usersTitle()}</Typography.Title>
+        <Space><Spin /> <Typography.Text>{m.usersLoading()}</Typography.Text></Space>
       </Space>
     )
   }
@@ -113,11 +114,11 @@ const UsersPage = () => {
   if (usersQuery.isError) {
     return (
       <Space orientation="vertical" size="large" style={{ width: '100%' }}>
-        <Typography.Title level={2} style={{ margin: 0 }}>Users</Typography.Title>
+        <Typography.Title level={2} style={{ margin: 0 }}>{m.usersTitle()}</Typography.Title>
         <Result
           status="error"
-          title="Unable to load users"
-          subTitle={usersQuery.error instanceof Error ? usersQuery.error.message : 'Unexpected error'}
+          title={m.usersUnableToLoad()}
+          subTitle={usersQuery.error instanceof Error ? usersQuery.error.message : m.mainUnexpectedError()}
         />
       </Space>
     )
@@ -127,7 +128,7 @@ const UsersPage = () => {
     <Space orientation="vertical" size="large" style={{ width: '100%' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Typography.Title level={2} style={{ margin: 0 }}>
-          Users
+          {m.usersTitle()}
         </Typography.Title>
         <Button
           type="primary"
@@ -137,10 +138,10 @@ const UsersPage = () => {
             setIsCreateOpen(true)
           }}
         >
-          Create user
+          {m.usersCreate()}
         </Button>
       </div>
-      <Typography.Paragraph>Manage user access and assignments here.</Typography.Paragraph>
+      <Typography.Paragraph>{m.usersDescription()}</Typography.Paragraph>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         <Select
           value={searchField}
@@ -150,13 +151,13 @@ const UsersPage = () => {
           }}
           style={{ width: 160 }}
           options={[
-            { value: 'name', label: 'Name' },
-            { value: 'email', label: 'Email' },
-            { value: 'username', label: 'Username' },
+            { value: 'name', label: m.mainName() },
+            { value: 'email', label: m.mainEmail() },
+            { value: 'username', label: m.mainUsername() },
           ]}
         />
         <Input
-          placeholder="Search users"
+          placeholder={m.usersSearch()}
           value={searchInput}
           allowClear
           onChange={(event) => setSearchInput(event.target.value)}
@@ -201,8 +202,8 @@ const UsersPage = () => {
         }}
         onEdit={(user) => {
           if (user.isSystem) {
-            showErrorNotification('System users cannot be edited.', {
-              title: 'Edit user blocked',
+            showErrorNotification(m.usersSystemCannotBeEditedWithPeriod(), {
+              title: m.usersEditBlocked(),
             })
             return
           }
@@ -222,22 +223,22 @@ const UsersPage = () => {
         }}
         onDelete={async (user) => {
           if (user.isSystem) {
-            showErrorNotification('System users cannot be deleted.', {
-              title: 'Delete user blocked',
+            showErrorNotification(m.usersSystemCannotBeDeleted(), {
+              title: m.usersDeleteBlocked(),
             })
             return
           }
 
           if (!currentUser?.id) {
-            showErrorNotification('Unable to determine current user.', {
-              title: 'Delete user blocked',
+            showErrorNotification(m.usersUnableToDetermineCurrentUser(), {
+              title: m.usersDeleteBlocked(),
             })
             return
           }
 
           if (currentUser.id === user.id) {
-            showErrorNotification('You cannot delete your own account.', {
-              title: 'Delete user blocked',
+            showErrorNotification(m.usersCannotDeleteOwnAccount(), {
+              title: m.usersDeleteBlocked(),
             })
             return
           }
@@ -248,8 +249,8 @@ const UsersPage = () => {
             await queryClient.invalidateQueries({ queryKey: ['users.list'] })
           } catch (error) {
             showErrorNotification(
-              error instanceof Error ? error.message : 'Unable to delete user',
-              { title: 'Unable to delete user' },
+              error instanceof Error ? error.message : m.usersUnableToDelete(),
+              { title: m.usersUnableToDelete() },
             )
           } finally {
             setDeletingId(null)
@@ -261,13 +262,13 @@ const UsersPage = () => {
           onClick={() => setPage((current) => Math.max(0, current - 1))}
           disabled={page === 0 || usersQuery.isFetching}
         >
-          Previous
+          {m.mainPrevious()}
         </Button>
         <Button
           onClick={() => setPage((current) => current + 1)}
           disabled={!usersQuery.data?.hasMore || usersQuery.isFetching}
         >
-          Next
+          {m.mainNext()}
         </Button>
       </div>
 
@@ -286,11 +287,11 @@ const UsersPage = () => {
             } else {
               const targetUser = users.find((user) => user.username === values.username)
               if (!targetUser) {
-                throw new Error('Unable to locate user id for update')
+                throw new Error(m.usersUnableToLocateId())
               }
 
               if (targetUser.isSystem) {
-                throw new Error('System users cannot be edited')
+                throw new Error(m.usersSystemCannotBeEdited())
               }
 
               await updateUser(targetUser.id, {
@@ -305,8 +306,8 @@ const UsersPage = () => {
             setIsCreateOpen(false)
           } catch (error) {
             showErrorNotification(
-              error instanceof Error ? error.message : 'Unable to save user',
-              { title: 'Unable to save user' },
+              error instanceof Error ? error.message : m.usersUnableToSave(),
+              { title: m.usersUnableToSave() },
             )
           } finally {
             setIsSubmitting(false)

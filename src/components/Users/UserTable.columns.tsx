@@ -1,6 +1,7 @@
 import { Button, Tag, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type {Group} from "../../api/types.ts";
+import { m } from '../../paraglide/messages'
 
 export interface UserRecord {
   id: string;
@@ -27,41 +28,41 @@ export const getUserColumns = (
   },
 ): ColumnsType<UserRecord> => [
   {
-    title: 'Name',
+    title: m.mainName(),
     key: 'name',
     render: (_, record) => (
       <span>
         {record.firstName} {record.lastName}
-        {record.isSystem ? <Tag style={{ marginInlineStart: 8 }}>System</Tag> : null}
+        {record.isSystem ? <Tag style={{ marginInlineStart: 8 }}>{m.mainSystem()}</Tag> : null}
       </span>
     ),
   },
   {
-    title: 'Username',
+    title: m.mainUsername(),
     dataIndex: 'username',
     key: 'username',
     sorter: true,
     sortOrder: sortOrderByField?.username,
   },
   {
-    title: 'Email',
+    title: m.mainEmail(),
     dataIndex: 'email',
     key: 'email',
     sorter: true,
     sortOrder: sortOrderByField?.email,
   },
   {
-    title: '2FA',
+    title: m.usersTableTwoFa(),
     dataIndex: 'twoFaEnabled',
     key: 'twoFaEnabled',
     render: (value: boolean | undefined) => (
       <Typography.Text type={value ? undefined : 'secondary'}>
-        {value ? 'Enabled' : 'Disabled'}
+        {value ? m.mainEnabled() : m.mainDisabled()}
       </Typography.Text>
     ),
   },
   {
-    title: 'Groups',
+    title: m.mainGroups(),
     dataIndex: 'groups',
     key: 'groups',
     render: (_userGroups: UserRecord['groups'], record) => {
@@ -112,7 +113,7 @@ export const getUserColumns = (
               disabled={Boolean(record.isSystem)}
               onClick={() => onEdit(record)}
             >
-              Edit
+              {m.mainEdit()}
             </Button>
           ),
         },

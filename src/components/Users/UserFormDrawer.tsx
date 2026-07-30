@@ -3,15 +3,16 @@ import { Button, Drawer, Form, Input, Select, Space, Switch } from 'antd'
 import { z } from 'zod'
 import type { Group } from '../../api/types'
 import { MAX_USER_GROUPS } from '../../config'
+import { m } from '../../paraglide/messages'
 
 const GRANT_TYPES = ['client_credentials', 'password', 'authorization_code', 'refresh_token', 'implicit'] as const;
 
 const GRANT_TYPE_LABELS: Record<typeof GRANT_TYPES[number], string> = {
-  client_credentials: 'Client Credentials',
-  password: 'Password',
-  authorization_code: 'Authorization Code',
-  refresh_token: 'Refresh Token',
-  implicit: 'Implicit',
+  client_credentials: m.mainGrantClientCredentials(),
+  password: m.mainPassword(),
+  authorization_code: m.mainGrantAuthorizationCode(),
+  refresh_token: m.mainGrantRefreshToken(),
+  implicit: m.mainGrantImplicit(),
 };
 
 export type UserFormValues = {
@@ -39,35 +40,35 @@ type UserFormDrawerProps = {
 
 const usernameSchema = z
   .string()
-  .min(1, 'Username is required')
-  .max(100, 'Username must be 100 characters or less')
-  .regex(/^([\w0-9_-])+$/u, 'Username can only include letters, numbers, "_" and "-"')
+  .min(1, m.validationUsernameRequired())
+  .max(100, m.validationUsernameMaxLength())
+  .regex(/^([\w0-9_-])+$/u, m.validationUsernamePattern())
 
 const passwordSchema = z
   .string()
-  .min(1, 'Password is required')
-  .max(50, 'Password must be 50 characters or less')
+  .min(1, m.validationPasswordRequired())
+  .max(50, m.validationPasswordMaxLength())
 
 const firstNameSchema = z
   .string()
-  .min(1, 'First name is required')
-  .max(100, 'First name must be 100 characters or less')
+  .min(1, m.validationFirstNameRequired())
+  .max(100, m.validationFirstNameMaxLength())
 
 const lastNameSchema = z
   .string()
-  .min(1, 'Last name is required')
-  .max(100, 'Last name must be 100 characters or less')
+  .min(1, m.validationLastNameRequired())
+  .max(100, m.validationLastNameMaxLength())
 
 const emailSchema = z
   .string()
-  .min(1, 'Email is required')
-  .max(100, 'Email must be 100 characters or less')
-  .email('Email must be valid')
+  .min(1, m.validationEmailRequired())
+  .max(100, m.validationEmailMaxLength())
+  .email(m.validationEmailValid())
 
-const grantTypesSchema = z.array(z.string()).min(1, 'At least one grant type is required');
+const grantTypesSchema = z.array(z.string()).min(1, m.validationAtLeastOneGrantTypeRequired());
 const groupsSchema = z
   .array(z.string())
-  .max(MAX_USER_GROUPS, `No more than ${MAX_USER_GROUPS} groups can be selected`);
+  .max(MAX_USER_GROUPS, m.validationNoMoreThanGroupsSelected({ max: MAX_USER_GROUPS }));
 
 const makeZodRule = (schema: z.ZodTypeAny) => ({
   validator: async (_: unknown, value: unknown) => {
@@ -76,7 +77,7 @@ const makeZodRule = (schema: z.ZodTypeAny) => ({
     const valueToParse = Array.isArray(value) && value.length === 0 ? [] : value ?? '';
     const result = schema.safeParse(valueToParse)
     if (result.success) return
-    throw new Error(result.error.issues[0]?.message ?? 'Invalid value')
+    throw new Error(result.error.issues[0]?.message ?? m.validationInvalidValue())
   },
 })
 
@@ -85,7 +86,7 @@ const makeOptionalZodRule = (schema: z.ZodTypeAny) => ({
     if (value === undefined || value === '') return
     const result = schema.safeParse(value)
     if (result.success) return
-    throw new Error(result.error.issues[0]?.message ?? 'Invalid value')
+    throw new Error(result.error.issues[0]?.message ?? m.validationInvalidValue())
   },
 })
 
@@ -123,7 +124,7 @@ export const UserFormDrawer = ({
     <Drawer
       open={open}
       width={480}
-      title={mode === 'create' ? 'Create user' : 'Edit user'}
+      title={mode === 'create' ? m.usersCreate() : m.usersEdit()}
       destroyOnClose
       forceRender
       onClose={onClose}
@@ -134,11 +135,11 @@ export const UserFormDrawer = ({
         onFinish={onSubmit}
         autoComplete="off"
       >
-        <Form.Item label="Username" name="username" required rules={[makeZodRule(usernameSchema)]}>
+        <Form.Item label={m.mainUsername()} name="username" required rules={[makeZodRule(usernameSchema)]}>
           <Input autoComplete="off" />
         </Form.Item>
         <Form.Item
-          label="Password"
+          label={m.mainPassword()}
           name="password"
           required={mode === 'create'}
           rules={[
@@ -149,27 +150,27 @@ export const UserFormDrawer = ({
         >
           <Input.Password autoComplete="new-password" />
         </Form.Item>
-        <Form.Item label="First name" name="firstName" required rules={[makeZodRule(firstNameSchema)]}>
+        <Form.Item label={m.mainFirstName()} name="firstName" required rules={[makeZodRule(firstNameSchema)]}>
           <Input />
         </Form.Item>
-        <Form.Item label="Last name" name="lastName" required rules={[makeZodRule(lastNameSchema)]}>
+        <Form.Item label={m.mainLastName()} name="lastName" required rules={[makeZodRule(lastNameSchema)]}>
           <Input />
         </Form.Item>
-        <Form.Item label="Email" name="email" required rules={[makeZodRule(emailSchema)]}>
+        <Form.Item label={m.mainEmail()} name="email" required rules={[makeZodRule(emailSchema)]}>
           <Input type="email" autoComplete="email" />
         </Form.Item>
-        <Form.Item label="Grant types" name="grantTypes" required rules={[makeZodRule(grantTypesSchema)]}>
-          <Select mode="multiple" allowClear style={{ width: '100%' }} placeholder="Please select">
+        <Form.Item label={m.mainGrantTypes()} name="grantTypes" required rules={[makeZodRule(grantTypesSchema)]}>
+          <Select mode="multiple" allowClear style={{ width: '100%' }} placeholder={m.mainPleaseSelect()}>
             {GRANT_TYPES.map((gt) => <Select.Option key={gt} value={gt}>{GRANT_TYPE_LABELS[gt]}</Select.Option>)}
           </Select>
         </Form.Item>
-        <Form.Item label="Groups" name="groups" rules={[makeZodRule(groupsSchema)]}>
+        <Form.Item label={m.mainGroups()} name="groups" rules={[makeZodRule(groupsSchema)]}>
           <Select
             mode="multiple"
             allowClear
             showSearch
             optionFilterProp="label"
-            placeholder="Search groups"
+            placeholder={m.groupsSearch()}
             maxCount={MAX_USER_GROUPS}
             options={availableGroups.map((group) => ({
               label: group.name,
@@ -177,14 +178,14 @@ export const UserFormDrawer = ({
             }))}
           />
         </Form.Item>
-        <Form.Item label="Two-factor authentication" name="twoFaEnabled" valuePropName="checked">
+        <Form.Item label={m.mainTwoFactorAuthentication()} name="twoFaEnabled" valuePropName="checked">
           <Switch />
         </Form.Item>
         <Form.Item>
           <Space>
-            <Button onClick={onClose}>Cancel</Button>
+            <Button onClick={onClose}>{m.mainCancel()}</Button>
             <Button type="primary" htmlType="submit" loading={isSubmitting}>
-              {mode === 'create' ? 'Create user' : 'Save changes'}
+              {mode === 'create' ? m.usersCreate() : m.mainSaveChanges()}
             </Button>
           </Space>
         </Form.Item>
