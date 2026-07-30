@@ -1,5 +1,6 @@
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
+import { paraglideVitePlugin } from '@inlang/paraglide-js'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
@@ -27,7 +28,14 @@ export default defineConfig(({ mode }) => {
   ]
 
   return {
-    plugins: [react()],
+    plugins: [
+      react(),
+      paraglideVitePlugin({
+        project: './project.inlang',
+        outdir: './src/paraglide',
+        emitTsDeclarations: true,
+      }),
+    ],
     base: '/admin-console/',
     server: {
       host: true,
@@ -48,5 +56,4 @@ export default defineConfig(({ mode }) => {
     },
   }
 })
-
 

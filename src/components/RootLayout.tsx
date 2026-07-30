@@ -1,38 +1,18 @@
 import { useState, useMemo } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from '@tanstack/react-router'
-import { Layout, Typography, Button, Space, Avatar, Grid, Menu, Drawer } from 'antd'
+import { Layout, Typography, Button, Space, Avatar, Grid, Menu, Drawer, Select } from 'antd'
 import { MenuOutlined, ProfileOutlined, UserOutlined, TeamOutlined } from '@ant-design/icons'
 import { BFF_LOGOUT_URL } from '../auth/urls'
 import { useUser } from '../hooks/useUser'
+import { m } from '../paraglide/messages'
+import { getLocale, setLocale, type Locale } from '../paraglide/runtime'
 import styles from './RootLayout.module.scss'
 
 const { useBreakpoint } = Grid
 
-const profileMenuItem = {
-  key: '/',
-  label: 'Profile',
-  icon: <ProfileOutlined />,
-}
-
-const adminMenuConfig = [
-  {
-    key: 'users',
-    label: 'Users',
-    icon: <UserOutlined />,
-    children: [
-      { key: '/users', label: 'Users List' },
-      { key: '/user-groups', label: 'User Groups' },
-    ],
-  },
-  {
-    key: 'clients',
-    label: 'Clients',
-    icon: <TeamOutlined />,
-    children: [
-      { key: '/clients', label: 'Clients List' },
-      { key: '/client-groups', label: 'Client Groups' },
-    ],
-  },
+const localeOptions: { value: Locale; label: string }[] = [
+  { value: 'en', label: 'English' },
+  { value: 'bg', label: 'Български' },
 ]
 
 const RootLayout = () => {
@@ -42,10 +22,45 @@ const RootLayout = () => {
   const { user, displayName, isAdmin, isLoading } = useUser({ enabled: !isPublicRoute })
   const navigate = useNavigate()
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [currentLocale, setCurrentLocale] = useState<Locale>(() => getLocale())
   const selectedMenuKey = location.pathname === '/profile' ? '/' : location.pathname
+
+  const profileMenuItem = useMemo(
+    () => ({
+      key: '/',
+      label: m.profileTitle(),
+      icon: <ProfileOutlined />,
+    }),
+    [currentLocale],
+  )
+
+  const adminMenuConfig = useMemo(
+    () => [
+      {
+        key: 'users',
+        label: m.usersTitle(),
+        icon: <UserOutlined />,
+        children: [
+          { key: '/users', label: m.layoutUsersList() },
+          { key: '/user-groups', label: m.userGroupsTitle() },
+        ],
+      },
+      {
+        key: 'clients',
+        label: m.clientsTitle(),
+        icon: <TeamOutlined />,
+        children: [
+          { key: '/clients', label: m.layoutClientsList() },
+          { key: '/client-groups', label: m.clientGroupsTitle() },
+        ],
+      },
+    ],
+    [currentLocale],
+  )
+
   const menuConfig = useMemo(
     () => (isAdmin ? [profileMenuItem, ...adminMenuConfig] : [profileMenuItem]),
-    [isAdmin],
+    [adminMenuConfig, currentLocale, isAdmin, profileMenuItem],
   )
 
   const fullName =
@@ -70,6 +85,19 @@ const RootLayout = () => {
     navigate({ to: item.key })
     setIsDrawerOpen(false)
   }
+
+  const languageControl = (
+    <Select<Locale>
+      aria-label={m.layoutLanguage()}
+      options={localeOptions}
+      value={currentLocale}
+      onChange={(locale) => {
+        setLocale(locale, { reload: false })
+        setCurrentLocale(locale)
+      }}
+      style={{ minWidth: 120 }}
+    />
+  )
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -105,6 +133,7 @@ const RootLayout = () => {
           )}
 
           {md && fullName && <Typography.Text strong>{fullName}</Typography.Text>}
+          {md && languageControl}
           <Avatar style={{ backgroundColor: '#1890ff' }}>{userInitial}</Avatar>
 
           {md && (
@@ -112,7 +141,7 @@ const RootLayout = () => {
               type="text"
               onClick={() => window.location.assign(BFF_LOGOUT_URL)}
             >
-              Sign out
+              {m.layoutSignOut()}
             </Button>
           )}
         </Space>
@@ -121,14 +150,17 @@ const RootLayout = () => {
 
       {/* MOBILE DRAWER: Responsive menu */}
       <Drawer
-        title="Menu"
+        title={m.layoutMenu()}
         placement="right"
         onClose={() => setIsDrawerOpen(false)}
         open={isDrawerOpen}
         bodyStyle={{ padding: 0 }}
       >
         <div style={{ padding: '16px' }}>
-          <Typography.Text strong>{fullName}</Typography.Text>
+          <Space direction="vertical" style={{ width: '100%' }}>
+            <Typography.Text strong>{fullName}</Typography.Text>
+            {languageControl}
+          </Space>
         </div>
         <Menu
           mode="inline"
@@ -145,12 +177,12 @@ const RootLayout = () => {
             ghost
             onClick={() => window.location.assign(BFF_LOGOUT_URL)}
           >
-            Sign out
+            {m.layoutSignOut()}
           </Button>
         </div>
       </Drawer>
 
-      <Layout.Content className={styles.content}>
+      <Layout.Content className={styles.content} key={currentLocale}>
         <Outlet />
       </Layout.Content>
     </Layout>

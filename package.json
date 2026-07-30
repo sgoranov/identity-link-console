@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
-    "build": "tsc -b && vite build",
+    "paraglide:compile": "paraglide-js compile --project ./project.inlang --outdir ./src/paraglide --emit-ts-declarations",
+    "build": "npm run paraglide:compile && tsc -b && vite build",
     "lint": "oxlint .",
     "preview": "vite preview"
   },
@@ -19,6 +20,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@inlang/paraglide-js": "^2.22.0",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",

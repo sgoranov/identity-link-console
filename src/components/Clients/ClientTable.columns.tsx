@@ -1,6 +1,7 @@
 import { Tag, Typography } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import type { Group } from '../../api/types'
+import { m } from '../../paraglide/messages'
 
 export interface ClientRecord {
   id: string
@@ -34,7 +35,7 @@ export const getClientColumns = (
   },
 ): ColumnsType<ClientRecord> => [
   {
-    title: 'Name',
+    title: m.mainName(),
     dataIndex: 'name',
     key: 'name',
     sorter: true,
@@ -42,12 +43,12 @@ export const getClientColumns = (
     render: (value: string, record) => (
       <span>
         {value}
-        {record.isSystem ? <Tag style={{ marginInlineStart: 8 }}>System</Tag> : null}
+        {record.isSystem ? <Tag style={{ marginInlineStart: 8 }}>{m.mainSystem()}</Tag> : null}
       </span>
     ),
   },
   {
-    title: 'Client ID',
+    title: m.clientsTableClientId(),
     dataIndex: 'id',
     key: 'id',
     render: (value: string) => (
@@ -55,26 +56,26 @@ export const getClientColumns = (
     ),
   },
   {
-    title: 'Description',
+    title: m.mainDescription(),
     dataIndex: 'description',
     key: 'description',
     render: (value: string | undefined) =>
       value ? value : <Typography.Text type="secondary">-</Typography.Text>,
   },
   {
-    title: 'Public',
+    title: m.clientsTablePublic(),
     dataIndex: 'public',
     key: 'public',
     sorter: true,
     sortOrder: sortOrderByField?.public,
     render: (value: boolean | undefined) => (
       <Typography.Text type={value ? undefined : 'secondary'}>
-        {value ? 'Yes' : 'No'}
+        {value ? m.mainYes() : m.mainNo()}
       </Typography.Text>
     ),
   },
   {
-    title: 'Groups',
+    title: m.mainGroups(),
     dataIndex: 'groups',
     key: 'groups',
     render: (clientGroups: ClientRecord['groups']) => {
