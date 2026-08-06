@@ -24,10 +24,10 @@ const GRANT_TYPE_LABELS: Record<typeof GRANT_TYPES[number], string> = {
 export type ClientFormValues = {
   name: string
   description: string
+  audience: string
   redirectUri: string[]
   groups: string[]
   grantTypes: string[]
-  scopes: string[]
   isPublic?: boolean
   consentRequired?: boolean
   applicationUrl: string
@@ -59,6 +59,19 @@ const descriptionSchema = z
   .min(1, m.validationDescriptionRequired())
   .max(3000, m.validationDescriptionMaxLength())
 
+const audienceSchema = z
+  .string()
+  .min(1, m.validationAudienceRequired())
+  .max(3000, m.validationAudienceMaxLength())
+  .url(m.validationAudienceHttpsUrl())
+  .refine((value) => {
+    try {
+      return new URL(value).protocol === 'https:'
+    } catch {
+      return false
+    }
+  }, m.validationAudienceHttpsUrl())
+
 const redirectUriSchema = z
   .array(
     z
@@ -83,8 +96,6 @@ const groupsSchema = z
   .max(MAX_CLIENT_GROUPS, m.validationCannotSpecifyMoreThanGroups({ max: MAX_CLIENT_GROUPS }))
 
 const grantTypesSchema = z.array(z.string())
-
-const scopesSchema = z.array(z.string())
 
 const makeZodRule = (schema: z.ZodTypeAny) => ({
   validator: async (_: unknown, value: unknown) => {
@@ -122,10 +133,10 @@ export const ClientFormDrawer = ({
     form.setFieldsValue({
       name: '',
       description: '',
+      audience: '',
       redirectUri: [],
       groups: [],
       grantTypes: [],
-      scopes: [],
       ...initialValues,
     })
   }, [form, initialValues, open])
@@ -150,6 +161,25 @@ export const ClientFormDrawer = ({
           rules={[makeZodRule(descriptionSchema)]}
         >
           <Input.TextArea rows={3} />
+        </Form.Item>
+        <Form.Item
+          label={m.clientsFormAudience()}
+          name="audience"
+          required
+          extra={
+            mode === 'create'
+              ? `${m.clientsFormAudienceDescription()} ${m.clientsFormAudienceImmutable()}`
+              : m.clientsFormAudienceImmutable()
+          }
+          rules={[makeZodRule(audienceSchema)]}
+        >
+          <Input
+            type="url"
+            inputMode="url"
+            autoComplete="off"
+            placeholder="https://"
+            disabled={mode === 'edit'}
+          />
         </Form.Item>
         <Form.Item
           label={m.clientsFormRedirectUris()}
@@ -185,9 +215,6 @@ export const ClientFormDrawer = ({
               </Select.Option>
             ))}
           </Select>
-        </Form.Item>
-        <Form.Item label={m.clientsFormScopes()} name="scopes" rules={[makeZodRule(scopesSchema)]}>
-          <Select mode="tags" tokenSeparators={[',', ' ']} placeholder={m.clientsFormAddScopes()} />
         </Form.Item>
         {mode === 'create' ? (
           <Form.Item label={m.clientsFormPublicClient()} name="isPublic" valuePropName="checked">

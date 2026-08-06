@@ -1,5 +1,5 @@
 import React from 'react'
-import { Button, Card, Popconfirm, Table, Tag } from 'antd'
+import { Button, Card, Popconfirm, Space, Spin, Table, Tag, Typography } from 'antd'
 import type { ColumnsType, SorterResult } from 'antd/es/table/interface'
 import type { Group } from '../../api/types'
 import { m } from '../../paraglide/messages'
@@ -8,11 +8,14 @@ interface GroupTableProps {
   groups: Group[]
   isLoading: boolean
   onEdit?: (group: Group) => void
+  onManageScopes?: (group: Group) => void
   onDelete?: (group: Group) => void
   onDeleteOpenChange?: (group: Group, open: boolean) => void
   deletingId?: string | null
   groupUserCounts?: Record<string, { count: number; hasMore: boolean }>
   groupUserCountsLoading?: Record<string, boolean>
+  groupAudiences?: Record<string, string[]>
+  groupAudiencesLoading?: Record<string, boolean>
   onSortChange?: (sorter: SorterResult<Group> | SorterResult<Group>[]) => void
   sortOrderByField?: {
     name?: 'ascend' | 'descend'
@@ -23,11 +26,14 @@ export const GroupTable: React.FC<GroupTableProps> = ({
   groups,
   isLoading,
   onEdit,
+  onManageScopes,
   onDelete,
   onDeleteOpenChange,
   deletingId,
   groupUserCounts,
   groupUserCountsLoading,
+  groupAudiences,
+  groupAudiencesLoading,
   onSortChange,
   sortOrderByField,
 }) => {
@@ -45,6 +51,21 @@ export const GroupTable: React.FC<GroupTableProps> = ({
         </span>
       ),
     },
+    {
+      title: m.groupScopesAssignedAudiences(),
+      key: 'audiences',
+      render: (_: unknown, record: Group) => {
+        if (groupAudiencesLoading?.[record.id]) return <Spin size="small" />
+        const audiences = groupAudiences?.[record.id] ?? []
+        return audiences.length > 0 ? (
+          <Space size={[0, 4]} wrap>
+            {audiences.map((audience) => <Tag key={audience}>{audience}</Tag>)}
+          </Space>
+        ) : (
+          <Typography.Text type="secondary">{m.groupScopesNoAssignedAudiences()}</Typography.Text>
+        )
+      },
+    },
     ...(onEdit
       ? [
           {
@@ -53,6 +74,11 @@ export const GroupTable: React.FC<GroupTableProps> = ({
             width: 1,
             render: (_: unknown, record: Group) => (
               <div style={{ display: 'flex', gap: 8 }}>
+                {onManageScopes ? (
+                  <Button type="link" onClick={() => onManageScopes(record)}>
+                    {m.groupScopesHeading()}
+                  </Button>
+                ) : null}
                 <Button
                   type="link"
                   disabled={Boolean(record.isSystem)}

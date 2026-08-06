@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button, Input, Result, Space, Spin, Typography } from 'antd'
 import { createGroup } from '../api/users/createGroup'
 import { deleteGroup } from '../api/users/deleteGroup'
 import { updateGroup } from '../api/users/updateGroup'
 import { fetchGroups, groupsQueryKey } from '../api/users/fetchGroups'
 import { fetchGroupUsers } from '../api/users/fetchGroupUsers'
+import { fetchGroupScopes, groupScopesQueryKey } from '../api/users/groupScopes'
 import type { Group, QueryPayload } from '../api/types'
 import { GroupFormDrawer, type GroupFormValues } from '../components/Users/GroupFormDrawer'
 import { GroupTable } from '../components/Users/GroupTable'
+import { GroupScopesDrawer } from '../components/Users/GroupScopesDrawer'
 import { showErrorNotification } from '../ui/notifications'
 import { DEFAULT_PAGE_SIZE } from '../config'
 import { m } from '../paraglide/messages'
@@ -18,6 +20,7 @@ const UserGroupsPage = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [drawerMode, setDrawerMode] = useState<'create' | 'edit'>('create')
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null)
+  const [scopesGroup, setScopesGroup] = useState<Group | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [page, setPage] = useState(0)
   const pageSize = DEFAULT_PAGE_SIZE
@@ -61,6 +64,25 @@ const UserGroupsPage = () => {
     queryKey: groupsQueryKey(groupsPayload),
     queryFn: () => fetchGroups(groupsPayload),
   })
+
+  const visibleGroups = groupsQuery.data?.items ?? []
+  const groupScopesQueries = useQueries({
+    queries: visibleGroups.map((group) => ({
+      queryKey: groupScopesQueryKey(group.id),
+      queryFn: () => fetchGroupScopes(group.id),
+    })),
+  })
+
+  const groupAudiences = Object.fromEntries(
+    visibleGroups.map((group, index) => [
+      group.id,
+      [...new Set((groupScopesQueries[index]?.data ?? []).map((scope) => scope.audience))],
+    ]),
+  )
+
+  const groupAudiencesLoading = Object.fromEntries(
+    visibleGroups.map((group, index) => [group.id, groupScopesQueries[index]?.isLoading ?? false]),
+  )
 
   if (groupsQuery.isLoading) {
     return (
@@ -128,6 +150,8 @@ const UserGroupsPage = () => {
         deletingId={deletingId}
         groupUserCounts={groupUserCounts}
         groupUserCountsLoading={groupUserCountsLoading}
+        groupAudiences={groupAudiences}
+        groupAudiencesLoading={groupAudiencesLoading}
         onEdit={(group) => {
           if (group.isSystem) {
             showErrorNotification(m.groupsSystemCannotBeEditedWithPeriod(), {
@@ -140,6 +164,7 @@ const UserGroupsPage = () => {
           setSelectedGroup(group)
           setIsDrawerOpen(true)
         }}
+        onManageScopes={setScopesGroup}
         onDeleteOpenChange={async (group, open) => {
           if (!open) return
           if (group.isSystem) return
@@ -264,6 +289,11 @@ const UserGroupsPage = () => {
             setIsSubmitting(false)
           }
         }}
+      />
+      <GroupScopesDrawer
+        group={scopesGroup}
+        open={Boolean(scopesGroup)}
+        onClose={() => setScopesGroup(null)}
       />
     </Space>
   )
