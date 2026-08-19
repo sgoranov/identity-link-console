@@ -65,7 +65,7 @@ const ProfilePage = () => {
   const queryClient = useQueryClient()
   const [form] = Form.useForm<ProfileFormValues>()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { session, user, groups, displayName, isLoading, isAdmin } = useUser()
+  const { session, user, roles, displayName, isLoading, hasRole } = useUser()
   const isSystem = user?.isSystem;
 
   const fullName =
@@ -161,7 +161,6 @@ const ProfilePage = () => {
         <Descriptions.Item label={m.mainUsername()}>{renderValue(user?.username)}</Descriptions.Item>
         <Descriptions.Item label={m.profileRole()}>
           <Space>
-            {isAdmin && <Tag color="blue">{m.profileAdministrator()}</Tag>}
             {isSystem ? <Tag color="purple">{m.profileSystemUser()}</Tag> : <Tag>{m.profileStandardUser()}</Tag>}
           </Space>
         </Descriptions.Item>
@@ -173,7 +172,7 @@ const ProfilePage = () => {
         onFinish={handleSubmit}
         autoComplete="off"
         style={{ maxWidth: 640 }}
-        disabled={isSystem}
+        disabled={isSystem || !hasRole('users.self.update')}
       >
         <Typography.Title level={4} style={{ marginTop: 0 }}>
           {m.profileDetails()}
@@ -188,7 +187,7 @@ const ProfilePage = () => {
           <Input type="email" autoComplete="email" />
         </Form.Item>
 
-        {!isSystem && (
+        {!isSystem && hasRole('users.self.update') && (
           <>
             <Form.Item
               label={m.profileNewPassword()}
@@ -237,12 +236,12 @@ const ProfilePage = () => {
         column={1}
         title={m.profileAccess()}
       >
-        <Descriptions.Item label={m.mainGroups()}>
-          {groups.length > 0 ? (
+        <Descriptions.Item label={m.profileRole()}>
+          {roles.length > 0 ? (
             <Space wrap size={[4, 4]}>
-              {groups.map((group) => (
-                <Tag color="blue" key={group.id}>
-                  {group.name}
+              {roles.map((role) => (
+                <Tag color="blue" key={role}>
+                  {role}
                 </Tag>
               ))}
             </Space>

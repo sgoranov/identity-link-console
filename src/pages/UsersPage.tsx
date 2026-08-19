@@ -63,7 +63,7 @@ const UsersPage = () => {
     queryFn: () => fetchUsers(payload),
   })
 
-  const { user: currentUser } = useUser()
+  const { user: currentUser, hasRole } = useUser()
 
   const groupsPayload: QueryPayload = {
     type: 'Group',
@@ -130,7 +130,7 @@ const UsersPage = () => {
         <Typography.Title level={2} style={{ margin: 0 }}>
           {m.usersTitle()}
         </Typography.Title>
-        <Button
+        {hasRole('users.write') && <Button
           type="primary"
           onClick={() => {
             setDrawerMode('create')
@@ -139,7 +139,7 @@ const UsersPage = () => {
           }}
         >
           {m.usersCreate()}
-        </Button>
+        </Button>}
       </div>
       <Typography.Paragraph>{m.usersDescription()}</Typography.Paragraph>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -200,7 +200,7 @@ const UsersPage = () => {
           setPage(0)
           setOrderBy(nextOrderBy)
         }}
-        onEdit={(user) => {
+        onEdit={hasRole('users.write') ? (user) => {
           if (user.isSystem) {
             showErrorNotification(m.usersSystemCannotBeEditedWithPeriod(), {
               title: m.usersEditBlocked(),
@@ -220,8 +220,8 @@ const UsersPage = () => {
             twoFaEnabled: Boolean(user.twoFaEnabled),
           })
           setIsCreateOpen(true)
-        }}
-        onDelete={async (user) => {
+        } : undefined}
+        onDelete={hasRole('users.delete') ? async (user) => {
           if (user.isSystem) {
             showErrorNotification(m.usersSystemCannotBeDeleted(), {
               title: m.usersDeleteBlocked(),
@@ -255,7 +255,7 @@ const UsersPage = () => {
           } finally {
             setDeletingId(null)
           }
-        }}
+        } : undefined}
       />
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
         <Button

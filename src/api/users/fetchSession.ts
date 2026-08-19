@@ -1,10 +1,12 @@
 import { fetchJson } from '../http'
 import { buildBffUrl } from '../bff'
+import type { Role } from '../../auth/roles'
 
 export interface SessionInfo {
   id: string
   access_token_present: boolean
   refresh_token_present: boolean
+  roles: Role[]
 
   name?: string
   email?: string

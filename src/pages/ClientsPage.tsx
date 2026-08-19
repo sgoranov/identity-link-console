@@ -13,10 +13,12 @@ import { ClientFormDrawer, type ClientFormValues } from '../components/Clients/C
 import { showErrorNotification } from '../ui/notifications'
 import { DEFAULT_PAGE_SIZE } from '../config'
 import { m } from '../paraglide/messages'
+import { useUser } from '../hooks/useUser'
 
 const ClientsPage = () => {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
+  const { hasRole } = useUser()
   const [page, setPage] = useState(0)
   const pageSize = DEFAULT_PAGE_SIZE
   const [searchInput, setSearchInput] = useState('')
@@ -110,7 +112,7 @@ const ClientsPage = () => {
         <Typography.Title level={2} style={{ margin: 0 }}>
           {m.clientsTitle()}
         </Typography.Title>
-        <Button
+        {hasRole('clients.write') && <Button
           type="primary"
           onClick={() => {
             setDrawerMode('create')
@@ -119,7 +121,7 @@ const ClientsPage = () => {
           }}
         >
           {m.clientsCreate()}
-        </Button>
+        </Button>}
       </div>
       <Typography.Paragraph>{m.clientsDescription()}</Typography.Paragraph>
       <Input
@@ -134,10 +136,10 @@ const ClientsPage = () => {
         availableGroups={groupsQuery.data?.items ?? []}
         isLoading={clientsQuery.isLoading || groupsQuery.isLoading}
         deletingId={deletingId}
-        onViewSecrets={(client) => {
+        onViewSecrets={hasRole('clients.secrets.read') ? (client) => {
           navigate({ to: '/clients/$clientId/secrets', params: { clientId: client.id } })
-        }}
-        onEdit={(client) => {
+        } : undefined}
+        onEdit={hasRole('clients.write') ? (client) => {
           if (client.isSystem) {
             showErrorNotification(m.clientsSystemCannotBeEditedWithPeriod(), {
               title: m.clientsEditBlocked(),
@@ -163,8 +165,8 @@ const ClientsPage = () => {
             logoUrl: client.logoUrl ?? null,
           })
           setIsDrawerOpen(true)
-        }}
-        onDelete={async (client) => {
+        } : undefined}
+        onDelete={hasRole('clients.delete') ? async (client) => {
           if (client.isSystem) {
             showErrorNotification(m.clientsSystemCannotBeDeleted(), {
               title: m.clientsDeleteBlocked(),
@@ -185,7 +187,7 @@ const ClientsPage = () => {
           } finally {
             setDeletingId(null)
           }
-        }}
+        } : undefined}
         onSortChange={(sorter) => {
           const sorters = Array.isArray(sorter) ? sorter : [sorter]
           const nextOrderBy: Record<string, 'ASC' | 'DESC'> = {}

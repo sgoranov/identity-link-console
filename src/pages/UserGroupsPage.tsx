@@ -14,9 +14,11 @@ import { GroupScopesDrawer } from '../components/Users/GroupScopesDrawer'
 import { showErrorNotification } from '../ui/notifications'
 import { DEFAULT_PAGE_SIZE } from '../config'
 import { m } from '../paraglide/messages'
+import { useUser } from '../hooks/useUser'
 
 const UserGroupsPage = () => {
   const queryClient = useQueryClient()
+  const { hasRole } = useUser()
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [drawerMode, setDrawerMode] = useState<'create' | 'edit'>('create')
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null)
@@ -123,7 +125,7 @@ const UserGroupsPage = () => {
         <Typography.Title level={2} style={{ margin: 0 }}>
           {m.userGroupsTitle()}
         </Typography.Title>
-        <Button
+        {hasRole('users.groups.write') && <Button
           type="primary"
           onClick={() => {
             setDrawerMode('create')
@@ -132,7 +134,7 @@ const UserGroupsPage = () => {
           }}
         >
           {m.groupsCreate()}
-        </Button>
+        </Button>}
       </div>
       <Typography.Paragraph>
         {m.userGroupsDescription()}
@@ -152,7 +154,7 @@ const UserGroupsPage = () => {
         groupUserCountsLoading={groupUserCountsLoading}
         groupAudiences={groupAudiences}
         groupAudiencesLoading={groupAudiencesLoading}
-        onEdit={(group) => {
+        onEdit={hasRole('users.groups.write') ? (group) => {
           if (group.isSystem) {
             showErrorNotification(m.groupsSystemCannotBeEditedWithPeriod(), {
               title: m.groupsEditBlocked(),
@@ -163,9 +165,9 @@ const UserGroupsPage = () => {
           setDrawerMode('edit')
           setSelectedGroup(group)
           setIsDrawerOpen(true)
-        }}
-        onManageScopes={setScopesGroup}
-        onDeleteOpenChange={async (group, open) => {
+        } : undefined}
+        onManageScopes={hasRole('users.groups.write') ? setScopesGroup : undefined}
+        onDeleteOpenChange={hasRole('users.groups.delete') ? async (group, open) => {
           if (!open) return
           if (group.isSystem) return
           if (groupUserCounts[group.id] || groupUserCountsLoading[group.id]) return
@@ -188,8 +190,8 @@ const UserGroupsPage = () => {
               [group.id]: false,
             }))
           }
-        }}
-        onDelete={async (group) => {
+        } : undefined}
+        onDelete={hasRole('users.groups.delete') ? async (group) => {
           if (group.isSystem) {
             showErrorNotification(m.groupsSystemCannotBeDeleted(), {
               title: m.groupsDeleteBlocked(),
@@ -210,7 +212,7 @@ const UserGroupsPage = () => {
           } finally {
             setDeletingId(null)
           }
-        }}
+        } : undefined}
         onSortChange={(sorter) => {
           const sorters = Array.isArray(sorter) ? sorter : [sorter]
           const nextOrderBy: Record<string, 'ASC' | 'DESC'> = {}

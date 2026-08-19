@@ -18,9 +18,11 @@ import {
 import { showErrorNotification } from '../ui/notifications'
 import { DEFAULT_PAGE_SIZE } from '../config'
 import { m } from '../paraglide/messages'
+import { useUser } from '../hooks/useUser'
 
 const ClientSecretsPage = () => {
   const queryClient = useQueryClient()
+  const { hasRole } = useUser()
   const { clientId } = useParams({ from: '/clients/$clientId/secrets' })
   const navigate = useNavigate()
   const [page, setPage] = useState(0)
@@ -94,7 +96,7 @@ const ClientSecretsPage = () => {
             {m.clientSecretsTitle()}
           </Typography.Title>
           <div style={{ display: 'flex', gap: 8 }}>
-          <Button
+          {hasRole('clients.secrets.write') && <Button
             type="primary"
             disabled={clientQuery.isLoading || isSystemClient}
             onClick={() => {
@@ -102,7 +104,7 @@ const ClientSecretsPage = () => {
             }}
           >
             {m.clientSecretsGenerate()}
-          </Button>
+          </Button>}
           <Button onClick={() => navigate({ to: '/clients' })}>{m.clientSecretsBackToClients()}</Button>
         </div>
       </div>
@@ -121,7 +123,7 @@ const ClientSecretsPage = () => {
         secrets={secretsQuery.data?.items ?? []}
         isLoading={secretsQuery.isLoading}
         deletingId={deletingId}
-        onDelete={async (secret) => {
+        onDelete={hasRole('clients.secrets.delete') ? async (secret) => {
           if (secret.isSystem) {
             showErrorNotification(m.clientSecretsSystemCannotBeDeleted(), {
               title: m.clientSecretsDeleteBlocked(),
@@ -142,7 +144,7 @@ const ClientSecretsPage = () => {
           } finally {
             setDeletingId(null)
           }
-        }}
+        } : undefined}
         onSortChange={(sorter) => {
           const sorters = Array.isArray(sorter) ? sorter : [sorter]
           const nextOrderBy: Record<string, 'ASC' | 'DESC'> = {}

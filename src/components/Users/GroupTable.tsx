@@ -68,7 +68,7 @@ export const GroupTable: React.FC<GroupTableProps> = ({
         )
       },
     },
-    ...(onEdit
+    ...(onEdit || onManageScopes || onDelete
       ? [
           {
             title: '',
@@ -81,13 +81,13 @@ export const GroupTable: React.FC<GroupTableProps> = ({
                     {m.groupScopesHeading()}
                   </Button>
                 ) : null}
-                <Button
+                {onEdit ? <Button
                   type="link"
                   disabled={Boolean(record.isSystem)}
                   onClick={() => onEdit(record)}
                 >
                   {m.mainEdit()}
-                </Button>
+                </Button> : null}
                 {onDelete ? (
                   (() => {
                     const countInfo = groupUserCounts?.[record.id]
