@@ -13,10 +13,12 @@ import { ClientFormDrawer, type ClientFormValues } from '../components/Clients/C
 import { showErrorNotification } from '../ui/notifications'
 import { DEFAULT_PAGE_SIZE } from '../config'
 import { m } from '../paraglide/messages'
+import { useUser } from '../hooks/useUser'
 
 const ClientsPage = () => {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
+  const { hasRole } = useUser()
   const [page, setPage] = useState(0)
   const pageSize = DEFAULT_PAGE_SIZE
   const [searchInput, setSearchInput] = useState('')
@@ -110,7 +112,7 @@ const ClientsPage = () => {
         <Typography.Title level={2} style={{ margin: 0 }}>
           {m.clientsTitle()}
         </Typography.Title>
-        <Button
+        {hasRole('clients.write') && <Button
           type="primary"
           onClick={() => {
             setDrawerMode('create')
@@ -119,7 +121,7 @@ const ClientsPage = () => {
           }}
         >
           {m.clientsCreate()}
-        </Button>
+        </Button>}
       </div>
       <Typography.Paragraph>{m.clientsDescription()}</Typography.Paragraph>
       <Input
@@ -134,10 +136,10 @@ const ClientsPage = () => {
         availableGroups={groupsQuery.data?.items ?? []}
         isLoading={clientsQuery.isLoading || groupsQuery.isLoading}
         deletingId={deletingId}
-        onViewSecrets={(client) => {
+        onViewSecrets={hasRole('clients.secrets.read') ? (client) => {
           navigate({ to: '/clients/$clientId/secrets', params: { clientId: client.id } })
-        }}
-        onEdit={(client) => {
+        } : undefined}
+        onEdit={hasRole('clients.write') ? (client) => {
           if (client.isSystem) {
             showErrorNotification(m.clientsSystemCannotBeEditedWithPeriod(), {
               title: m.clientsEditBlocked(),
@@ -151,10 +153,10 @@ const ClientsPage = () => {
             isSystem: client.isSystem,
             name: client.name,
             description: client.description ?? '',
+            audience: client.audience ?? '',
             redirectUri: client.redirectUri ?? [],
             groups: client.groups?.data ?? [],
             grantTypes: client.grantTypes ?? [],
-            scopes: client.scopes ?? [],
             isPublic: Boolean(client.public),
             consentRequired: Boolean(client.consentRequired),
             applicationUrl: client.applicationUrl ?? null,
@@ -163,8 +165,8 @@ const ClientsPage = () => {
             logoUrl: client.logoUrl ?? null,
           })
           setIsDrawerOpen(true)
-        }}
-        onDelete={async (client) => {
+        } : undefined}
+        onDelete={hasRole('clients.delete') ? async (client) => {
           if (client.isSystem) {
             showErrorNotification(m.clientsSystemCannotBeDeleted(), {
               title: m.clientsDeleteBlocked(),
@@ -185,7 +187,7 @@ const ClientsPage = () => {
           } finally {
             setDeletingId(null)
           }
-        }}
+        } : undefined}
         onSortChange={(sorter) => {
           const sorters = Array.isArray(sorter) ? sorter : [sorter]
           const nextOrderBy: Record<string, 'ASC' | 'DESC'> = {}
@@ -243,10 +245,10 @@ const ClientsPage = () => {
               await createClient({
                 name: values.name,
                 description: values.description,
+                audience: values.audience,
                 redirectUri: values.redirectUri,
                 groups: values.groups,
                 grantTypes: values.grantTypes,
-                scopes: values.scopes,
                 isPublic: Boolean(values.isPublic),
                 consentRequired: Boolean(values.consentRequired),
                 applicationUrl: values.applicationUrl || null,
@@ -274,7 +276,6 @@ const ClientsPage = () => {
               redirectUri: values.redirectUri,
               groups: values.groups,
               grantTypes: values.grantTypes,
-              scopes: values.scopes,
               consentRequired: Boolean(values.consentRequired),
               applicationUrl: values.applicationUrl || null,
               termsOfServiceUrl: values.termsOfServiceUrl || null,

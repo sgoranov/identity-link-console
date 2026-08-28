@@ -5,10 +5,10 @@ import type { ClientRecord } from '../../components/Clients/ClientTable.columns'
 export type CreateClientPayload = {
   name: string
   description: string
+  audience: string
   redirectUri: string[]
   groups: string[]
   grantTypes: string[]
-  scopes: string[]
   isPublic: boolean
   consentRequired: boolean,
   applicationUrl: string|null,

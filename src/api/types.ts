@@ -2,6 +2,13 @@ export interface Group {
   id: string;
   name: string;
   isSystem?: boolean;
+  scopes?: GroupScope[] | Record<string, GroupScope>;
+}
+
+export interface GroupScope {
+  id: string;
+  audience: string;
+  scope: string;
 }
 
 export interface QueryResponse<T> {

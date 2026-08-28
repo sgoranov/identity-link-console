@@ -3,7 +3,7 @@ import { buildBffUrl } from '../bff'
 import type { ClientRecord } from '../../components/Clients/ClientTable.columns'
 import type { CreateClientPayload } from './createClient'
 
-export type UpdateClientPayload = Omit<CreateClientPayload, 'isPublic'>
+export type UpdateClientPayload = Omit<CreateClientPayload, 'isPublic' | 'audience'>
 
 export const updateClient = async (
   clientId: string,

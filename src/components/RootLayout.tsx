@@ -19,7 +19,7 @@ const RootLayout = () => {
   const { md } = useBreakpoint()
   const location = useLocation()
   const isPublicRoute = location.pathname === '/logout-success'
-  const { user, displayName, isAdmin, isLoading } = useUser({ enabled: !isPublicRoute })
+  const { user, displayName, hasRole, isLoading } = useUser({ enabled: !isPublicRoute })
   const navigate = useNavigate()
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [currentLocale, setCurrentLocale] = useState<Locale>(() => getLocale())
@@ -34,15 +34,15 @@ const RootLayout = () => {
     [currentLocale],
   )
 
-  const adminMenuConfig = useMemo(
+  const restrictedMenuConfig = useMemo(
     () => [
       {
         key: 'users',
         label: m.usersTitle(),
         icon: <UserOutlined />,
         children: [
-          { key: '/users', label: m.layoutUsersList() },
-          { key: '/user-groups', label: m.userGroupsTitle() },
+          ...(hasRole('users.read') ? [{ key: '/users', label: m.layoutUsersList() }] : []),
+          ...(hasRole('users.groups.read') ? [{ key: '/user-groups', label: m.userGroupsTitle() }] : []),
         ],
       },
       {
@@ -50,17 +50,17 @@ const RootLayout = () => {
         label: m.clientsTitle(),
         icon: <TeamOutlined />,
         children: [
-          { key: '/clients', label: m.layoutClientsList() },
-          { key: '/client-groups', label: m.clientGroupsTitle() },
+          ...(hasRole('clients.read') ? [{ key: '/clients', label: m.layoutClientsList() }] : []),
+          ...(hasRole('clients.groups.read') ? [{ key: '/client-groups', label: m.clientGroupsTitle() }] : []),
         ],
       },
-    ],
-    [currentLocale],
+    ].filter((item) => item.children.length > 0),
+    [currentLocale, hasRole],
   )
 
   const menuConfig = useMemo(
-    () => (isAdmin ? [profileMenuItem, ...adminMenuConfig] : [profileMenuItem]),
-    [adminMenuConfig, currentLocale, isAdmin, profileMenuItem],
+    () => [profileMenuItem, ...restrictedMenuConfig],
+    [restrictedMenuConfig, profileMenuItem],
   )
 
   const fullName =
@@ -73,7 +73,7 @@ const RootLayout = () => {
 
   // Determine the default open sub-menu based on the current URL path
   const defaultOpenKeys = useMemo(() => {
-    for (const item of adminMenuConfig) {
+    for (const item of restrictedMenuConfig) {
       if (item.children?.some((child) => child.key === location.pathname)) {
         return [item.key]
       }

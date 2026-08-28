@@ -7,13 +7,13 @@ export interface ClientRecord {
   id: string
   name: string
   description?: string
+  audience: string
   redirectUri?: string[]
   groups?: {
     data: string[]
     hasMore: boolean
   }
   grantTypes?: string[]
-  scopes?: string[]
   public?: boolean
   isSystem?: boolean
   consentRequired?: boolean

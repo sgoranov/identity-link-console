@@ -3,8 +3,7 @@ import type { QueryClient } from '@tanstack/react-query'
 import { Spin, Typography } from 'antd'
 import { fetchSession, sessionQueryKey } from './api/users/fetchSession'
 import { fetchCurrentUser, currentUserQueryKey } from './api/users/fetchCurrentUser'
-import { fetchUserGroups, userGroupsQueryKey } from './api/users/fetchUserGroups'
-import { ADMINISTRATOR_GROUP } from './config'
+import { hasRole, type Role } from './auth/roles'
 import { m } from './paraglide/messages'
 // Vite dev server can occasionally get into a bad HMR/cached state where it thinks a module
 // doesn't have a default export (even when it does). Importing the namespace avoids a hard
@@ -112,10 +111,7 @@ const logoutSuccessRoute = createRoute({
   component: lazyRouteComponent(() => import('./pages/LogoutSuccessPage')),
 })
 
-// Administrative guard for restricted routes
-const adminBeforeLoad = async ({ context, location }: { context: RouterContext; location: any }) => {
-  // Keep the guard logic consistent with src/hooks/useUser.ts:
-  // admin status is derived from the user's group names fetched via fetchUserGroups(username).
+const requireRole = (role: Role) => async ({ context, location }: { context: RouterContext; location: any }) => {
   const session = await context.queryClient.ensureQueryData({
     queryKey: sessionQueryKey(),
     queryFn: fetchSession,
@@ -130,19 +126,7 @@ const adminBeforeLoad = async ({ context, location }: { context: RouterContext; 
     })
   }
 
-  const user = await context.queryClient.ensureQueryData({
-    queryKey: currentUserQueryKey(session.id),
-    queryFn: () => fetchCurrentUser(session.id),
-  })
-
-  const groups = await context.queryClient.ensureQueryData({
-    queryKey: userGroupsQueryKey(user.username),
-    queryFn: () => fetchUserGroups(user.username),
-  })
-
-  const isAdmin = groups?.some((g) => g.name === ADMINISTRATOR_GROUP) ?? false
-
-  if (!isAdmin) {
+  if (!hasRole(session.roles, role)) {
     throw redirect({
       to: '/',
       search: {
@@ -155,35 +139,35 @@ const adminBeforeLoad = async ({ context, location }: { context: RouterContext; 
 const clientsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/clients',
-  beforeLoad: adminBeforeLoad,
+  beforeLoad: requireRole('clients.read'),
   component: lazyRouteComponent(() => import('./pages/ClientsPage')),
 })
 
 const clientGroupsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/client-groups',
-  beforeLoad: adminBeforeLoad,
+  beforeLoad: requireRole('clients.groups.read'),
   component: lazyRouteComponent(() => import('./pages/ClientGroupsPage')),
 })
 
 const clientSecretsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/clients/$clientId/secrets',
-  beforeLoad: adminBeforeLoad,
+  beforeLoad: requireRole('clients.secrets.read'),
   component: lazyRouteComponent(() => import('./pages/ClientSecretsPage')),
 })
 
 const usersRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/users',
-  beforeLoad: adminBeforeLoad,
+  beforeLoad: requireRole('users.read'),
   component: lazyRouteComponent(() => import('./pages/UsersPage')),
 })
 
 const userGroupsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/user-groups',
-  beforeLoad: adminBeforeLoad,
+  beforeLoad: requireRole('users.groups.read'),
   component: lazyRouteComponent(() => import('./pages/UserGroupsPage')),
 })
 

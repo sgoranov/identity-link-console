@@ -5,7 +5,6 @@ declare global {
       VITE_BFF_BASE_URL?: string
       VITE_MAX_CLIENT_GROUPS?: string
       VITE_DEFAULT_PAGE_SIZE?: string
-      VITE_ADMINISTRATOR_GROUP?: string
     }
   }
 }
@@ -25,8 +24,6 @@ const env = {
   VITE_DEFAULT_PAGE_SIZE:
     runtime?.VITE_DEFAULT_PAGE_SIZE ?? import.meta.env.VITE_DEFAULT_PAGE_SIZE,
 
-  VITE_ADMINISTRATOR_GROUP:
-    runtime?.VITE_ADMINISTRATOR_GROUP ?? import.meta.env.VITE_ADMINISTRATOR_GROUP,
 }
 
 const parsePositiveInt = (value: string | undefined, fallback: number) => {
@@ -52,6 +49,3 @@ export const DEFAULT_PAGE_SIZE = parsePositiveInt(
   env.VITE_DEFAULT_PAGE_SIZE,
   10,
 )
-
-export const ADMINISTRATOR_GROUP =
-  env.VITE_ADMINISTRATOR_GROUP ?? "administrator"
