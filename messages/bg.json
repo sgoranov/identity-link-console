@@ -36,7 +36,7 @@
 
   "validationAtLeastOneGrantTypeRequired": "Изисква се поне един grant тип",
   "validationAtLeastOneRedirectUriRequired": "Изисква се поне един redirect URI",
-  "validationAudienceHttpsUrl": "Audience трябва да е валиден HTTPS URL",
+  "validationAudienceHttpUrl": "Audience трябва да е валиден HTTP или HTTPS URL",
   "validationAudienceMaxLength": "Audience трябва да е най-много 3000 символа",
   "validationAudienceRequired": "Audience е задължително",
   "validationCannotSpecifyMoreThanGroups": "Не можете да зададете повече от {max} групи",
@@ -89,7 +89,7 @@
   "clientsFormAddRedirectUris": "Добавете redirect URI адреси",
   "clientsFormApplicationUrl": "URL на приложението",
   "clientsFormAudience": "Audience",
-  "clientsFormAudienceDescription": "Единственият HTTPS идентификатор на API или resource server, който трябва да приема токените на този клиент. Използва се като aud claim в токена.",
+  "clientsFormAudienceDescription": "Единственият HTTP или HTTPS идентификатор на API или resource server, който трябва да приема токените на този клиент. Използва се като aud claim в токена.",
   "clientsFormAudienceImmutable": "Изберете внимателно: аудиторията не може да бъде променяна след създаването на клиента.",
   "clientsFormConsentRequired": "Изисква съгласие",
   "clientsFormLogoUrl": "URL на лого",

@@ -36,7 +36,7 @@
 
   "validationAtLeastOneGrantTypeRequired": "At least one grant type is required",
   "validationAtLeastOneRedirectUriRequired": "At least one redirect URI is required",
-  "validationAudienceHttpsUrl": "Audience must be a valid HTTPS URL",
+  "validationAudienceHttpUrl": "Audience must be a valid HTTP or HTTPS URL",
   "validationAudienceMaxLength": "Audience must be 3000 characters or less",
   "validationAudienceRequired": "Audience is required",
   "validationCannotSpecifyMoreThanGroups": "You cannot specify more than {max} groups",
@@ -89,7 +89,7 @@
   "clientsFormAddRedirectUris": "Add redirect URIs",
   "clientsFormApplicationUrl": "Application URL",
   "clientsFormAudience": "Audience",
-  "clientsFormAudienceDescription": "The single HTTPS identifier of the API or resource server intended to accept this client's tokens. It is used as the token's aud claim.",
+  "clientsFormAudienceDescription": "The single HTTP or HTTPS identifier of the API or resource server intended to accept this client's tokens. It is used as the token's aud claim.",
   "clientsFormAudienceImmutable": "Choose carefully: the audience cannot be changed after the client is created.",
   "clientsFormConsentRequired": "Require Consent",
   "clientsFormLogoUrl": "Logo URL",
