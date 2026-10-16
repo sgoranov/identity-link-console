@@ -23,7 +23,9 @@ const UsersPage = () => {
   const pageSize = DEFAULT_PAGE_SIZE
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [drawerMode, setDrawerMode] = useState<'create' | 'edit'>('create')
-  const [selectedUser, setSelectedUser] = useState<UserFormValues | null>(null)
+  const [selectedUser, setSelectedUser] = useState<
+    (UserFormValues & { id?: string; isSystem?: boolean }) | null
+  >(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [searchInput, setSearchInput] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
@@ -210,6 +212,8 @@ const UsersPage = () => {
 
           setDrawerMode('edit')
           setSelectedUser({
+            id: user.id,
+            isSystem: user.isSystem,
             username: user.username,
             password: '',
             firstName: user.firstName,
@@ -285,16 +289,15 @@ const UsersPage = () => {
             if (drawerMode === 'create') {
               await createUser(values)
             } else {
-              const targetUser = users.find((user) => user.username === values.username)
-              if (!targetUser) {
+              if (!selectedUser?.id) {
                 throw new Error(m.usersUnableToLocateId())
               }
 
-              if (targetUser.isSystem) {
+              if (selectedUser.isSystem) {
                 throw new Error(m.usersSystemCannotBeEdited())
               }
 
-              await updateUser(targetUser.id, {
+              await updateUser(selectedUser.id, {
                 ...values,
                 password: values.password || undefined,
               })

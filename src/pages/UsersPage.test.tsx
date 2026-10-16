@@ -252,7 +252,7 @@ describe('UsersPage', () => {
       expect(bff.mutations()[0].body).toMatchObject({ password: 'n3w-s3cret' })
     })
 
-    it('[BUG-1] saves a username change to the edited user, not to the user who had that username', async () => {
+    it('saves a username change to the edited user, not to the user who had that username', async () => {
       const { bff, user } = await renderUsersPage()
 
       const drawer = await openEditDrawer(user, jane.email)
@@ -269,20 +269,20 @@ describe('UsersPage', () => {
       expect(bff.data.users.find((candidate) => candidate.id === bob.id)?.email).toBe(bob.email)
     })
 
-    it('[BUG-1] saves a username change to a username that is not on the current page', async () => {
+    it('saves a username change to a username that is not on the current page', async () => {
       const { bff, user } = await renderUsersPage()
 
       const drawer = await openEditDrawer(user, jane.email)
       const username = within(drawer).getByLabelText(m.mainUsername())
       await user.clear(username)
-      await user.type(username, 'jane.doe')
+      await user.type(username, 'jane_doe')
       await user.click(within(drawer).getByRole('button', { name: m.mainSaveChanges() }))
 
       await waitFor(() => expect(bff.mutations()).toHaveLength(1))
       expect(bff.mutations()[0]).toMatchObject({
         method: 'PUT',
         path: `/proxy/users/api/v1/user/${jane.id}`,
-        body: expect.objectContaining({ username: 'jane.doe' }),
+        body: expect.objectContaining({ username: 'jane_doe' }),
       })
     })
   })
