@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button, Input, Result, Space, Spin, Typography } from 'antd'
 import { useNavigate } from '@tanstack/react-router'
 import { fetchClients, clientsQueryKey } from '../api/clients/fetchClients'
@@ -58,6 +58,8 @@ const ClientsPage = () => {
   const clientsQuery = useQuery({
     queryKey: clientsQueryKey(clientsPayload),
     queryFn: () => fetchClients(clientsPayload),
+    // Keep the current results on screen while a new search, order or page loads.
+    placeholderData: keepPreviousData,
   })
 
   const groupsPayload: QueryPayload = {
@@ -134,7 +136,7 @@ const ClientsPage = () => {
       <ClientTable
         clients={clientsQuery.data?.items ?? []}
         availableGroups={groupsQuery.data?.items ?? []}
-        isLoading={clientsQuery.isLoading || groupsQuery.isLoading}
+        isLoading={clientsQuery.isLoading || groupsQuery.isLoading || clientsQuery.isPlaceholderData}
         deletingId={deletingId}
         onViewSecrets={hasRole('clients.secrets.read') ? (client) => {
           navigate({ to: '/clients/$clientId/secrets', params: { clientId: client.id } })

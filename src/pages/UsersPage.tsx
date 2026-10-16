@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useQueries, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button, Input, Result, Select, Space, Typography, Spin } from 'antd'
 import { createUser } from '../api/users/createUser'
 import { deleteUser } from '../api/users/deleteUser'
@@ -63,6 +63,8 @@ const UsersPage = () => {
   const usersQuery = useQuery({
     queryKey: usersQueryKey(payload),
     queryFn: () => fetchUsers(payload),
+    // Keep the current results on screen while a new search, order or page loads.
+    placeholderData: keepPreviousData,
   })
 
   const { user: currentUser, hasRole } = useUser()
@@ -171,7 +173,7 @@ const UsersPage = () => {
         users={users}
         availableGroups={groupList}
         userGroupsByUsername={userGroupsByUsername}
-        isLoading={usersQuery.isLoading || groupsQuery.isLoading || isUserGroupsLoading}
+        isLoading={usersQuery.isLoading || groupsQuery.isLoading || isUserGroupsLoading || usersQuery.isPlaceholderData}
         deletingId={deletingId}
         currentUserId={currentUser?.id}
         sortOrderByField={{

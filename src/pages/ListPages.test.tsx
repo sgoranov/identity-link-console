@@ -261,7 +261,7 @@ describe.each(variants)('$kind list', (variant) => {
         await waitFor(() => expect(lastListRequest().query).toBeUndefined())
       })
 
-      it('[BUG-5] keeps the search box focused while the results load', async () => {
+      it('keeps the search box focused while the results load', async () => {
         const { user } = await renderListPage([1, 2, 3])
 
         await user.type(searchBox(), 'record-02')
