@@ -87,7 +87,7 @@ const redirectUriSchema = z
 const uriSchema = z.preprocess(
   (value) => value === '' ? undefined : value,
   z.string()
-    .max(3000, m.validationRedirectUriMaxLength())
+    .max(3000, m.validationUriMaxLength())
     .url(m.validationUriValid())
     .optional()
 );

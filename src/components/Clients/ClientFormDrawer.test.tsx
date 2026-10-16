@@ -4,7 +4,7 @@ import userEvent, { type UserEvent } from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { MAX_CLIENT_GROUPS } from '../../config'
 import { m } from '../../paraglide/messages'
-import { addTags, chooseOption, expectFieldError, findFieldError, paste } from '../../test/antd'
+import { addTags, chooseOption, expectFieldError, paste } from '../../test/antd'
 import { aGroup } from '../../test/fixtures'
 import { ClientFormDrawer, type ClientFormValues } from './ClientFormDrawer'
 
@@ -153,11 +153,11 @@ describe('ClientFormDrawer', () => {
     { field: 'terms of service URL', label: () => m.clientsFormTermsOfServiceUrl() },
     { field: 'privacy policy URL', label: () => m.clientsFormPrivacyPolicyUrl() },
     { field: 'logo URL', label: () => m.clientsFormLogoUrl() },
-  ])('[BUG-3] does not describe a too long $field as a redirect URI', async ({ label }) => {
+  ])('rejects a $field longer than 3000 characters', async ({ label }) => {
     const { user } = renderDrawer()
 
     const input = await pasteInto(user, label(), `https://example.com/${'a'.repeat(3000)}`)
 
-    expect(await findFieldError(input)).not.toBe(m.validationRedirectUriMaxLength())
+    await expectFieldError(input, m.validationUriMaxLength())
   })
 })

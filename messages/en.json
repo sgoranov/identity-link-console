@@ -63,6 +63,7 @@
   "validationRedirectUriMaxLength": "Redirect URI must be 3000 characters or less",
   "validationRedirectUriRequired": "Redirect URI is required",
   "validationRedirectUriValid": "Redirect URI must be valid",
+  "validationUriMaxLength": "URI must be 3000 characters or less",
   "validationUriValid": "URI must be valid",
   "validationUsernameMaxLength": "Username must be 100 characters or less",
   "validationUsernamePattern": "Username can only include letters, numbers, \"_\" and \"-\"",

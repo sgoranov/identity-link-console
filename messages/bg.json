@@ -63,6 +63,7 @@
   "validationRedirectUriMaxLength": "Redirect URI трябва да е най-много 3000 символа",
   "validationRedirectUriRequired": "Redirect URI е задължителен",
   "validationRedirectUriValid": "Redirect URI трябва да е валиден",
+  "validationUriMaxLength": "URI трябва да е най-много 3000 символа",
   "validationUriValid": "URI трябва да е валиден",
   "validationUsernameMaxLength": "Потребителското име трябва да е най-много 100 символа",
   "validationUsernamePattern": "Потребителското име може да съдържа само букви, цифри, \"_\" и \"-\"",

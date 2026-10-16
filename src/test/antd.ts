@@ -42,14 +42,6 @@ export const addTags = (user: UserEvent, input: HTMLElement, tags: string[]) =>
 const fieldError = (input: HTMLElement) =>
   input.closest('.ant-form-item')?.querySelector('.ant-form-item-explain-error')?.textContent || undefined
 
-// The first validation error shown under a form field, once one has rendered.
-export const findFieldError = (input: HTMLElement) =>
-  waitFor(() => {
-    const error = fieldError(input)
-    if (!error) throw new Error('No validation error shown')
-    return error
-  })
-
 // Waits until the field shows the given validation error. The error can change
 // while a value is entered (e.g. "required" right after clearing the field),
 // so this waits for the expected one instead of taking the first.
