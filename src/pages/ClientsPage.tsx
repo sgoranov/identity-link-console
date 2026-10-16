@@ -4,6 +4,7 @@ import { Button, Input, Result, Space, Spin, Typography } from 'antd'
 import { useNavigate } from '@tanstack/react-router'
 import { fetchClients, clientsQueryKey } from '../api/clients/fetchClients'
 import { fetchClientGroups, clientGroupsQueryKey } from '../api/clients/fetchGroups'
+import { fetchAllPages } from '../api/fetchAllPages'
 import { createClient } from '../api/clients/createClient'
 import { updateClient } from '../api/clients/updateClient'
 import { deleteClient } from '../api/clients/deleteClient'
@@ -70,9 +71,10 @@ const ClientsPage = () => {
     orderBy: { 't.name': 'ASC' },
   }
 
+  // Every group, for client form group selection
   const groupsQuery = useQuery({
-    queryKey: clientGroupsQueryKey(groupsPayload),
-    queryFn: () => fetchClientGroups(groupsPayload),
+    queryKey: [...clientGroupsQueryKey(groupsPayload), 'all'],
+    queryFn: () => fetchAllPages(fetchClientGroups, groupsPayload),
   })
 
   if (clientsQuery.isLoading) {
@@ -135,7 +137,7 @@ const ClientsPage = () => {
       />
       <ClientTable
         clients={clientsQuery.data?.items ?? []}
-        availableGroups={groupsQuery.data?.items ?? []}
+        availableGroups={groupsQuery.data ?? []}
         isLoading={clientsQuery.isLoading || groupsQuery.isLoading || clientsQuery.isPlaceholderData}
         deletingId={deletingId}
         onViewSecrets={hasRole('clients.secrets.read') ? (client) => {
@@ -236,7 +238,7 @@ const ClientsPage = () => {
       <ClientFormDrawer
         open={isDrawerOpen}
         mode={drawerMode}
-        availableGroups={groupsQuery.data?.items ?? []}
+        availableGroups={groupsQuery.data ?? []}
         initialValues={selectedClient ?? undefined}
         isSubmitting={isSubmitting}
         onClose={() => setIsDrawerOpen(false)}

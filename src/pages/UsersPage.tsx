@@ -6,6 +6,7 @@ import { deleteUser } from '../api/users/deleteUser'
 import { updateUser } from '../api/users/updateUser'
 import { fetchUsers, usersQueryKey } from '../api/users/fetchUsers'
 import { fetchGroups, groupsQueryKey } from '../api/users/fetchGroups'
+import { fetchAllPages } from '../api/fetchAllPages'
 import { fetchUserGroups, userGroupsQueryKey } from '../api/users/fetchUserGroups'
 import type { QueryPayload } from "../api/types.ts"
 import { UserTable } from "../components/Users/UserTable.tsx"
@@ -77,10 +78,10 @@ const UsersPage = () => {
     offset: 0,
   };
 
-  // 2. Groups Query - list for user form group selection
+  // 2. Groups Query - every group, for user form group selection
   const groupsQuery = useQuery({
-    queryKey: groupsQueryKey(groupsPayload),
-    queryFn: () => fetchGroups(groupsPayload),
+    queryKey: [...groupsQueryKey(groupsPayload), 'all'],
+    queryFn: () => fetchAllPages(fetchGroups, groupsPayload),
   })
 
   const users = usersQuery.data?.items ?? []
@@ -104,7 +105,7 @@ const UsersPage = () => {
   const isUserGroupsLoading = userGroupsQueries.some((query) => query.isLoading)
 
   // Safely extract the group list for the lookup table
-  const groupList = groupsQuery.data?.items ?? [];
+  const groupList = groupsQuery.data ?? [];
 
   if (usersQuery.isLoading) {
     return (

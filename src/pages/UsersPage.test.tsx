@@ -136,7 +136,7 @@ describe('UsersPage', () => {
     expect(within(row).getByRole('button', { name: m.mainDelete() })).toBeDisabled()
   })
 
-  it('[BUG-7] offers every group to choose from, not only the first page of them', async () => {
+  it('offers every group to choose from, not only the first page of them', async () => {
     const groups = Array.from({ length: DEFAULT_PAGE_SIZE + 1 }, (_, index) =>
       aGroup({ id: `group-${index + 10}-id`, name: `group-${index + 10}` }),
     )
