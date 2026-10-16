@@ -171,6 +171,7 @@
   "groupsUnableToDelete": "Unable to delete group",
   "groupsUnableToLoad": "Unable to load groups",
   "groupsUnableToSave": "Unable to save group",
+  "groupsUsageNotChecked": "Could not check whether this group is in use.",
 
   "profileAccess": "Access",
   "profileAccount": "Account",

@@ -127,7 +127,7 @@ describe.each(variants)('$kind page', (variant) => {
       ).toBeInTheDocument()
     })
 
-    it('[BUG-2] says when the group is not in use', async () => {
+    it('says when the group is not in use', async () => {
       const { user } = await renderGroupsPage()
 
       const popup = await openDeleteConfirmation(user, auditors)
@@ -145,13 +145,14 @@ describe.each(variants)('$kind page', (variant) => {
       expect(screen.getByText('Query service unavailable')).toBeInTheDocument()
     })
 
-    it('[BUG-2] does not claim the group is unused when the usage check fails', async () => {
+    it('says that the usage could not be checked when the check fails', async () => {
       const { bff, user } = await renderGroupsPage({ members: 2 })
       bff.fail('post', `/proxy/${variant.service}/api/v1/query`, 'Query service unavailable', 503)
 
       const popup = await openDeleteConfirmation(user, operators)
       await screen.findByText(m.groupsUnableToCheckUsage())
 
+      expect(await within(popup).findByText(usageDescription(m.groupsUsageNotChecked()))).toBeInTheDocument()
       expect(within(popup).queryByText(usageDescription(variant.notAssigned()))).not.toBeInTheDocument()
     })
 

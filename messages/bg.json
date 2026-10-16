@@ -171,6 +171,7 @@
   "groupsUnableToDelete": "Неуспешно изтриване на група",
   "groupsUnableToLoad": "Неуспешно зареждане на групи",
   "groupsUnableToSave": "Неуспешно запазване на група",
+  "groupsUsageNotChecked": "Не можа да се провери дали тази група се използва.",
 
   "profileAccess": "Достъп",
   "profileAccount": "Акаунт",
