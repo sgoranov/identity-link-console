@@ -145,7 +145,7 @@ export const ClientFormDrawer = ({
   return (
     <Drawer
       open={open}
-      width={520}
+      size={520}
       title={mode === 'create' ? m.clientsCreate() : m.clientsEdit()}
       destroyOnClose
       forceRender

@@ -123,7 +123,7 @@ export const UserFormDrawer = ({
   return (
     <Drawer
       open={open}
-      width={480}
+      size={480}
       title={mode === 'create' ? m.usersCreate() : m.usersEdit()}
       destroyOnClose
       forceRender

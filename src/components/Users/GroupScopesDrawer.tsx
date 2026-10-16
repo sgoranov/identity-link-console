@@ -235,7 +235,7 @@ export const ScopeAssignmentsDrawer = ({
   return (
     <Drawer
       open={open}
-      width="min(1400px, 100vw)"
+      size="min(1400px, 100vw)"
       title={subject ? title(subject.name) : m.groupScopesHeading()}
       onClose={onClose}
       destroyOnClose
