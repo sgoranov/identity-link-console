@@ -16,8 +16,7 @@ export default defineConfig((env) =>
       unstubGlobals: true,
       unstubEnvs: true,
       coverage: {
-        // Tests tagged [BUG-n] fail on purpose until those bugs are fixed; still
-        // report coverage.
+        // Still report coverage when some tests fail.
         reportOnFailure: true,
         include: ['src/**/*.{ts,tsx}'],
         exclude: ['src/paraglide/**', 'src/test/**', 'src/**/*.test.{ts,tsx}', 'src/main.tsx'],

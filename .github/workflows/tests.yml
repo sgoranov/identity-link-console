@@ -40,11 +40,5 @@ jobs:
       - name: Build
         run: npm run build
 
-      # Tests tagged [BUG-n] describe known bugs and fail until those are
-      # fixed, so they run in the next step, which may fail.
       - name: Test
-        run: npm run test:coverage -- --testNamePattern '^(?!.*\[BUG-)'
-
-      - name: Known bugs
-        continue-on-error: true
-        run: npm test -- --testNamePattern '\[BUG-'
+        run: npm run test:coverage
