@@ -7,6 +7,7 @@ import {
   fetchAuthorizationAudiences,
   fetchAuthorizationScopes,
 } from '../../api/authorization'
+import type { AuthorizationOption } from '../../api/authorization'
 import {
   createGroupScope,
   deleteGroupScope,
@@ -37,7 +38,17 @@ type ScopeAssignmentsDrawerProps = {
   title: (name: string) => string
   checkboxHelp: string
   systemReadOnly: string
+  // Users hold the OpenID Connect default scopes implicitly, so only clients
+  // need them assigned.
+  showOpenIdConnectResources?: boolean
 }
+
+const toScopeOptions = (options: Record<string, AuthorizationOption>, kind: string) =>
+  Object.entries(options).map(([value, definition]) => ({
+    value,
+    description: definition.description,
+    kind,
+  }))
 
 export const ScopeAssignmentsDrawer = ({
   subject,
@@ -51,6 +62,7 @@ export const ScopeAssignmentsDrawer = ({
   title,
   checkboxHelp,
   systemReadOnly,
+  showOpenIdConnectResources = false,
 }: ScopeAssignmentsDrawerProps) => {
   const queryClient = useQueryClient()
   const [selectedAudience, setSelectedAudience] = useState<string>()
@@ -90,21 +102,26 @@ export const ScopeAssignmentsDrawer = ({
   })
 
   const scopeOptions = useMemo(() => {
-    if (!scopesQuery.data) return { aliases: [], scopes: [] }
+    if (!scopesQuery.data) {
+      return { aliases: [], scopes: [], openIdConnectAliases: [], openIdConnectScopes: [] }
+    }
+
+    const openIdConnect = scopesQuery.data.openid_connect_resources
 
     return {
-      aliases: Object.entries(scopesQuery.data.aliases).map(([value, definition]) => ({
-        value,
-        description: definition.description,
-        kind: m.groupScopesAlias(),
-      })),
-      scopes: Object.entries(scopesQuery.data.scopes).map(([value, definition]) => ({
-        value,
-        description: definition.description,
-        kind: m.groupScopesScope(),
-      })),
+      aliases: toScopeOptions(scopesQuery.data.aliases, m.groupScopesAlias()),
+      scopes: toScopeOptions(scopesQuery.data.scopes, m.groupScopesScope()),
+      openIdConnectAliases: showOpenIdConnectResources
+        ? toScopeOptions(openIdConnect.aliases, m.groupScopesAlias())
+        : [],
+      openIdConnectScopes: showOpenIdConnectResources
+        ? toScopeOptions(openIdConnect.scopes, m.groupScopesScope())
+        : [],
     }
-  }, [scopesQuery.data])
+  }, [scopesQuery.data, showOpenIdConnectResources])
+
+  const hasOpenIdConnectOptions =
+    scopeOptions.openIdConnectAliases.length > 0 || scopeOptions.openIdConnectScopes.length > 0
 
   const assignedScopes = new Map(
     (scopesAssignmentsQuery.data ?? [])
@@ -195,6 +212,23 @@ export const ScopeAssignmentsDrawer = ({
     </div>
   )
 
+  // Without emptyText, an empty subsection is not rendered at all.
+  const renderSubsection = (
+    heading: string,
+    options: typeof scopeOptions.scopes,
+    emptyText?: string,
+  ) =>
+    options.length > 0 || emptyText ? (
+      <div>
+        <Typography.Title level={5}>{heading}</Typography.Title>
+        {options.length > 0 ? (
+          renderOptions(options)
+        ) : (
+          <Typography.Text type="secondary">{emptyText}</Typography.Text>
+        )}
+      </div>
+    ) : null
+
   return (
     <Drawer
       open={open}
@@ -235,25 +269,41 @@ export const ScopeAssignmentsDrawer = ({
           <Spin />
         ) : scopesQuery.isError ? (
           <Typography.Text type="danger">{m.groupScopesUnableToLoadOptions()}</Typography.Text>
-        ) : scopeOptions.aliases.length === 0 && scopeOptions.scopes.length === 0 ? (
+        ) : scopeOptions.aliases.length === 0 &&
+          scopeOptions.scopes.length === 0 &&
+          !hasOpenIdConnectOptions ? (
           <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={m.groupScopesNoOptions()} />
         ) : (
           <Space orientation="vertical" size="large" style={{ width: '100%' }}>
+            {hasOpenIdConnectOptions ? (
+              <section>
+                <Typography.Title level={4}>{m.groupScopesOpenIdConnectHeading()}</Typography.Title>
+                <Typography.Paragraph type="secondary">
+                  {m.groupScopesOpenIdConnectDescription()}
+                </Typography.Paragraph>
+                <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
+                  {renderSubsection(m.groupScopesAliasesHeading(), scopeOptions.openIdConnectAliases)}
+                  {renderSubsection(m.groupScopesHeading(), scopeOptions.openIdConnectScopes)}
+                </Space>
+              </section>
+            ) : null}
             <section>
-              <Typography.Title level={4}>{m.groupScopesAliasesHeading()}</Typography.Title>
-              {scopeOptions.aliases.length > 0 ? (
-                renderOptions(scopeOptions.aliases)
-              ) : (
-                <Typography.Text type="secondary">{m.groupScopesNoAliases()}</Typography.Text>
-              )}
-            </section>
-            <section>
-              <Typography.Title level={4}>{m.groupScopesHeading()}</Typography.Title>
-              {scopeOptions.scopes.length > 0 ? (
-                renderOptions(scopeOptions.scopes)
-              ) : (
-                <Typography.Text type="secondary">{m.groupScopesNoScopes()}</Typography.Text>
-              )}
+              <Typography.Title level={4}>{m.groupScopesAudienceScopesHeading()}</Typography.Title>
+              <Typography.Paragraph type="secondary">
+                {m.groupScopesAudienceScopesDescription()}
+              </Typography.Paragraph>
+              <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
+                {renderSubsection(
+                  m.groupScopesAliasesHeading(),
+                  scopeOptions.aliases,
+                  m.groupScopesNoAliases(),
+                )}
+                {renderSubsection(
+                  m.groupScopesHeading(),
+                  scopeOptions.scopes,
+                  m.groupScopesNoScopes(),
+                )}
+              </Space>
             </section>
           </Space>
         )}

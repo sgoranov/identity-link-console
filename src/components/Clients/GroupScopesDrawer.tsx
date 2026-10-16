@@ -27,5 +27,6 @@ export const GroupScopesDrawer = ({ group, open, onClose }: GroupScopesDrawerPro
     title={(name) => m.clientGroupScopesTitle({ group: name })}
     checkboxHelp={m.clientGroupScopesCheckboxHelp()}
     systemReadOnly={m.clientGroupScopesSystemReadOnly()}
+    showOpenIdConnectResources
   />
 )

@@ -10,9 +10,16 @@ export type AuthorizationOption = {
   scopes?: string[]
 }
 
-export type AuthorizationScopes = {
+// Keyed by scope or alias name. The IDP encodes an empty map as [] rather
+// than {}, which Object.entries treats the same way.
+export type AuthorizationScopeSet = {
   scopes: Record<string, AuthorizationOption>
   aliases: Record<string, AuthorizationOption>
+}
+
+export type AuthorizationScopes = AuthorizationScopeSet & {
+  // OpenID Connect default scopes and aliases, shared by every audience.
+  openid_connect_resources: AuthorizationScopeSet
 }
 
 export const audiencesQueryKey = ['authorization.audiences']
