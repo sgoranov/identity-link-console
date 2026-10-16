@@ -75,11 +75,11 @@ describe('config', () => {
     VITE_MAX_USER_GROUPS: '',
   }
 
-  it('[BUG-6] uses the defaults when the runtime config leaves every setting empty', async () => {
+  it('uses the defaults when the runtime config leaves every setting empty', async () => {
     expect(await loadConfig({ runtime: unsetInDocker })).toEqual(defaults)
   })
 
-  it('[BUG-6] uses the build-time settings when the runtime config leaves them empty', async () => {
+  it('uses the build-time settings when the runtime config leaves them empty', async () => {
     expect(await loadConfig({ runtime: unsetInDocker, build: buildSettings })).toEqual({
       BFF_BASE_URL: '/build/bff',
       DEFAULT_PAGE_SIZE: 25,
