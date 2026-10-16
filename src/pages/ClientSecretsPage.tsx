@@ -199,7 +199,7 @@ const ClientSecretsPage = () => {
           <Typography.Paragraph type="secondary" style={{ marginTop: 4 }}>
             {m.clientSecretsStoreSecurely()}
           </Typography.Paragraph>
-          <Space align="start" direction="vertical" style={{ width: '100%' }}>
+          <Space align="start" orientation="vertical" style={{ width: '100%' }}>
             <Input.Password value={generatedSecret} readOnly />
             <Space>
               <Button
