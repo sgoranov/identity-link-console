@@ -103,7 +103,7 @@ const ProfilePage = () => {
       await queryClient.invalidateQueries({ queryKey: currentUserQueryKey(session?.id) })
       await queryClient.invalidateQueries({ queryKey: sessionQueryKey() })
       notification.success({
-        message: m.profileUpdated(),
+        title: m.profileUpdated(),
         description: m.profileChangesSaved(),
         placement: 'top',
       })

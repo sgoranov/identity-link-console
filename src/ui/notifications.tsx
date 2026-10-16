@@ -12,7 +12,7 @@ export const showErrorNotification = (
   const { title = m.mainUnableToSave() } = options
 
   notification.error({
-    message: <span style={{ fontSize: 16, fontWeight: 600 }}>{title}</span>,
+    title: <span style={{ fontSize: 16, fontWeight: 600 }}>{title}</span>,
     description: <span style={{ fontSize: 16 }}>{description}</span>,
     duration: 0,
     placement: 'top',
