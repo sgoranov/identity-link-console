@@ -164,6 +164,9 @@ export const ScopeAssignmentsDrawer = ({
 
   const isLoading = audiencesQuery.isLoading || scopesAssignmentsQuery.isLoading
   const hasLoadError = audiencesQuery.isError || scopesAssignmentsQuery.isError
+  // The effect above selects an audience one render after the audiences have
+  // loaded. Until then the scopes are as good as loading.
+  const isSelectingAudience = !selectedAudience && Boolean(audiencesQuery.data?.length)
 
   const renderOptions = (options: typeof scopeOptions.scopes) => (
     <div
@@ -265,7 +268,7 @@ export const ScopeAssignmentsDrawer = ({
           <Spin />
         ) : hasLoadError ? (
           <Typography.Text type="danger">{m.groupScopesUnableToLoad()}</Typography.Text>
-        ) : selectedAudience && scopesQuery.isLoading ? (
+        ) : isSelectingAudience || scopesQuery.isLoading ? (
           <Spin />
         ) : scopesQuery.isError ? (
           <Typography.Text type="danger">{m.groupScopesUnableToLoadOptions()}</Typography.Text>

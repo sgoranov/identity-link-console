@@ -212,15 +212,15 @@ describe.each(variants)('$kind scopes drawer', (variant) => {
       },
     })
 
-    // Wait for the scopes to be requested, so the message below comes from
-    // the response rather than from the moment before loading (BUG-4).
+    // Wait for the scopes to be requested, so the message below is known to
+    // come from the response and not from before loading.
     await waitFor(() =>
       expect(bff.requests.map((request) => request.path)).toContain('/proxy/authorization-metadata/scopes'),
     )
     expect(await screen.findByText(m.groupScopesNoOptions())).toBeInTheDocument()
   })
 
-  it('[BUG-4] does not say that no scopes are available while they are loading', async () => {
+  it('does not say that no scopes are available while they are loading', async () => {
     let claimedNoScopes = false
     const observer = new MutationObserver(() => {
       if (document.body.textContent?.includes(m.groupScopesNoOptions())) claimedNoScopes = true
