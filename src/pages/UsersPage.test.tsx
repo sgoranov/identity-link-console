@@ -252,7 +252,7 @@ describe('UsersPage', () => {
       expect(bff.mutations()[0].body).toMatchObject({ password: 'n3w-s3cret' })
     })
 
-    it('saves a username change to the edited user, not to the user who had that username', async () => {
+    it('sends a username change to the edited user, not to the user who had that username', async () => {
       const { bff, user } = await renderUsersPage()
 
       const drawer = await openEditDrawer(user, jane.email)
@@ -266,6 +266,9 @@ describe('UsersPage', () => {
         method: 'PUT',
         path: `/proxy/users/api/v1/user/${jane.id}`,
       })
+      // The users service rejects a username that another user already has.
+      expect(await screen.findByText(`Invalid username. The value "${bob.username}" already exists.`)).toBeInTheDocument()
+      expect(screen.getByRole('dialog')).toBeInTheDocument()
       expect(bff.data.users.find((candidate) => candidate.id === bob.id)?.email).toBe(bob.email)
     })
 

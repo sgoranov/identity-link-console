@@ -94,6 +94,10 @@ const list = <T extends object>(items: T[], payload: QueryPayload) => {
 
 const notFound = (what: string) => HttpResponse.json({ error: `${what} not found` }, { status: 404 })
 
+// The users service's answer to a username that another user already has.
+const usernameExists = (username: string) =>
+  HttpResponse.json({ error: `Invalid username. The value "${username}" already exists.` }, { status: 400 })
+
 // An in-memory BFF covering every endpoint the console calls. Mutations change
 // the data, so a page that refetches after saving sees the result, and every
 // request is recorded for assertions on what the page sent.
@@ -237,6 +241,7 @@ export const setupFakeBff = (seed: Partial<FakeBffData> = {}) => {
         groups?: string[]
         password?: string
       }
+      if (data.users.some((candidate) => candidate.username === fields.username)) return usernameExists(fields.username)
       const user = aUser({ ...fields, id: newId('user'), groups: { data: groups, hasMore: false } })
       data.users.push(user)
       return HttpResponse.json(user)
@@ -248,6 +253,10 @@ export const setupFakeBff = (seed: Partial<FakeBffData> = {}) => {
       }
       const user = data.users.find((candidate) => candidate.id === params.id)
       if (!user) return notFound('User')
+      const { username } = fields
+      if (username !== undefined && data.users.some((candidate) => candidate !== user && candidate.username === username)) {
+        return usernameExists(username)
+      }
       Object.assign(user, fields, groups ? { groups: { data: groups, hasMore: false } } : {})
       return HttpResponse.json(user)
     }),
