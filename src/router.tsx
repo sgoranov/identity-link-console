@@ -1,6 +1,7 @@
 import { createRootRouteWithContext, createRoute, lazyRouteComponent, redirect, Outlet } from '@tanstack/react-router'
 import type { QueryClient } from '@tanstack/react-query'
 import { Spin, Typography } from 'antd'
+import { UnauthorizedError } from './api/http'
 import { fetchSession, sessionQueryKey } from './api/users/fetchSession'
 import { fetchCurrentUser, currentUserQueryKey } from './api/users/fetchCurrentUser'
 import { hasRole, type Role } from './auth/roles'
@@ -87,6 +88,10 @@ const rootRoute = createRootRouteWithContext<RouterContext>()({
         }
       }
     } catch (error) {
+      // The browser is already on its way to the login page. Keep showing the
+      // pending screen until it gets there, instead of an error.
+      if (error instanceof UnauthorizedError) return new Promise<never>(() => {})
+
       console.error('Session verification failed:', error)
       throw error
     }

@@ -56,6 +56,9 @@ describe('route guards', () => {
     renderRoute('/users')
 
     await waitFor(() => expect(assign).toHaveBeenCalledWith(`${window.location.origin}/bff/login`))
+    // Until the login page loads, the session is still being verified rather
+    // than reported as an error.
+    expect(await screen.findByText(m.layoutVerifyingSession())).toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: m.usersTitle() })).not.toBeInTheDocument()
   })
 

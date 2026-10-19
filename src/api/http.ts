@@ -18,6 +18,14 @@ const redirectToLogin = (serverProvidedUrl?: string) => {
   window.location.assign(loginUrl.toString());
 };
 
+// Thrown for a 401 response, once the browser has been sent to the login page.
+export class UnauthorizedError extends Error {
+  constructor() {
+    super('Unauthorized')
+    this.name = 'UnauthorizedError'
+  }
+}
+
 export const fetchJson = async <T = unknown>(
   input: RequestInfo | URL,
   options: RequestOptions = {},
@@ -38,7 +46,7 @@ export const fetchJson = async <T = unknown>(
   if (response.status === 401) {
     const data = await response.json().catch(() => ({}));
     redirectToLogin(data.loginUrl || data.location);
-    throw new Error('Unauthorized');
+    throw new UnauthorizedError();
   }
 
   if (response.status === 403) {
