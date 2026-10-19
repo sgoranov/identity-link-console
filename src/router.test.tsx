@@ -1,5 +1,6 @@
 import { screen, waitFor } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import userEvent from '@testing-library/user-event'
+import { describe, expect, it, vi } from 'vitest'
 import type { Role } from './auth/roles'
 import { m } from './paraglide/messages'
 import { aClient, admin, allRolesExcept, aSession } from './test/fixtures'
@@ -60,6 +61,27 @@ describe('route guards', () => {
     // than reported as an error.
     expect(await screen.findByText(m.layoutVerifyingSession())).toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: m.usersTitle() })).not.toBeInTheDocument()
+  })
+
+  it('shows the error and offers to try again when the session cannot be verified', async () => {
+    const bff = setupFakeBff(seedFor([]))
+    bff.fail('get', '/session', 'BFF unavailable', 503)
+    // The app, React and the router each log the failure.
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const user = userEvent.setup()
+
+    renderRoute('/')
+
+    expect(await screen.findByText(m.layoutErrorTitle())).toBeInTheDocument()
+    expect(screen.getByText('BFF unavailable')).toBeInTheDocument()
+    expect(consoleError).toHaveBeenCalledWith('Session verification failed:', expect.any(Error))
+
+    // The BFF is back.
+    setupFakeBff(seedFor([]))
+    await user.click(screen.getByRole('button', { name: m.layoutTryAgain() }))
+
+    expect(await screen.findByText(m.profileAccount())).toBeInTheDocument()
   })
 
   it('shows the logout page without checking the session', async () => {

@@ -70,10 +70,12 @@
   "validationUsernameRequired": "Username is required",
 
   "layoutClientsList": "Clients List",
+  "layoutErrorTitle": "Something went wrong",
   "layoutLoadFailed": "Failed to load the main layout. Please restart the dev server and clear Vite cache.",
   "layoutLanguage": "Language",
   "layoutMenu": "Menu",
   "layoutSignOut": "Sign out",
+  "layoutTryAgain": "Try again",
   "layoutUsersList": "Users List",
   "layoutVerifyingSession": "Verifying session...",
 

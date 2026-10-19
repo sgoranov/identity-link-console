@@ -70,10 +70,12 @@
   "validationUsernameRequired": "Потребителското име е задължително",
 
   "layoutClientsList": "Списък с клиенти",
+  "layoutErrorTitle": "Нещо се обърка",
   "layoutLanguage": "Език",
   "layoutLoadFailed": "Основният layout не можа да се зареди. Рестартирайте dev сървъра и изчистете Vite кеша.",
   "layoutMenu": "Меню",
   "layoutSignOut": "Изход",
+  "layoutTryAgain": "Опитайте отново",
   "layoutUsersList": "Списък с потребители",
   "layoutVerifyingSession": "Проверява се сесията...",
 

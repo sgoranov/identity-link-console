@@ -1,6 +1,14 @@
-import { createRootRouteWithContext, createRoute, lazyRouteComponent, redirect, Outlet } from '@tanstack/react-router'
+import {
+  createRootRouteWithContext,
+  createRoute,
+  lazyRouteComponent,
+  redirect,
+  Outlet,
+  useRouter,
+  type ErrorComponentProps,
+} from '@tanstack/react-router'
 import type { QueryClient } from '@tanstack/react-query'
-import { Spin, Typography } from 'antd'
+import { Button, Result, Spin, Typography } from 'antd'
 import { UnauthorizedError } from './api/http'
 import { fetchSession, sessionQueryKey } from './api/users/fetchSession'
 import { fetchCurrentUser, currentUserQueryKey } from './api/users/fetchCurrentUser'
@@ -25,6 +33,36 @@ if (!RootLayout) {
     `RootLayout module had no exports. ` +
       `This is usually a Vite dev-server cache/transform issue. ` +
       `Exports: ${keys.length ? keys.join(', ') : '(none)'}`
+  )
+}
+
+// Replaces the whole app when the session cannot be verified, e.g. because the
+// BFF is down, and when a page fails to load or render.
+const RootError = ({ error }: ErrorComponentProps) => {
+  const router = useRouter()
+
+  return (
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#f5f6f8',
+      }}
+    >
+      <Result
+        status="error"
+        title={m.layoutErrorTitle()}
+        subTitle={error instanceof Error ? error.message : m.mainUnexpectedError()}
+        extra={
+          // Runs the session check and the page's loading again.
+          <Button type="primary" onClick={() => router.invalidate()}>
+            {m.layoutTryAgain()}
+          </Button>
+        }
+      />
+    </div>
   )
 }
 
@@ -63,6 +101,7 @@ const rootRoute = createRootRouteWithContext<RouterContext>()({
       <Typography.Text type="secondary">{m.layoutVerifyingSession()}</Typography.Text>
     </div>
   ),
+  errorComponent: RootError,
   // Global guard: verify the session and fetch user before rendering the layout
   beforeLoad: async ({ context, location }) => {
     if (location.pathname === '/logout-success') {
