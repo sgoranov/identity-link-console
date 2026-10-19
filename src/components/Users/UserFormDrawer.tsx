@@ -125,7 +125,7 @@ export const UserFormDrawer = ({
       open={open}
       size={480}
       title={mode === 'create' ? m.usersCreate() : m.usersEdit()}
-      destroyOnClose
+      destroyOnHidden
       forceRender
       onClose={onClose}
     >

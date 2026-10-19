@@ -238,7 +238,7 @@ export const ScopeAssignmentsDrawer = ({
       size="min(1400px, 100vw)"
       title={subject ? title(subject.name) : m.groupScopesHeading()}
       onClose={onClose}
-      destroyOnClose
+      destroyOnHidden
     >
       <Space orientation="vertical" size="large" style={{ width: '100%' }}>
         <div>
