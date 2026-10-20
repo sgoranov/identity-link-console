@@ -2,7 +2,7 @@ import '@testing-library/jest-dom/vitest'
 import { createElement } from 'react'
 import { cleanup, configure, waitFor } from '@testing-library/react'
 import { ConfigProvider, notification } from 'antd'
-import { afterAll, afterEach, beforeAll } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, vi } from 'vitest'
 import { server } from './server'
 import { matchMedia, resetViewport } from './viewport'
 
@@ -37,6 +37,22 @@ ConfigProvider.config({
 
 beforeAll(() => server.listen({ onUnhandledFrame: 'error' }))
 
+// Errors and warnings logged during a test, such as React and antd warnings,
+// fail it. A test that expects one stubs the console method itself, which
+// replaces the recording.
+let unexpectedLogs: string[] = []
+
+beforeEach(() => {
+  unexpectedLogs = []
+  for (const method of ['error', 'warn'] as const) {
+    const log = console[method]
+    vi.spyOn(console, method).mockImplementation((...args: unknown[]) => {
+      unexpectedLogs.push(`console.${method}: ${args.map(String).join(' ')}`)
+      log(...args)
+    })
+  }
+})
+
 afterEach(async () => {
   cleanup()
   // Notifications render outside the test's container, so cleanup() misses
@@ -50,6 +66,11 @@ afterEach(async () => {
   }
   server.resetHandlers()
   resetViewport()
+
+  // Checked last, as unmounting can log too.
+  if (unexpectedLogs.length > 0) {
+    throw new Error(`The test logged unexpected errors or warnings:\n${unexpectedLogs.join('\n')}`)
+  }
 })
 
 afterAll(() => server.close())

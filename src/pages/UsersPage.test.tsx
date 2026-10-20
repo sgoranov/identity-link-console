@@ -1,6 +1,6 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import type { QueryPayload } from '../api/types'
 import type { Role } from '../auth/roles'
 import { DEFAULT_PAGE_SIZE } from '../config'
@@ -44,11 +44,14 @@ describe('UsersPage', () => {
   it('shows the BFF error when users cannot be loaded', async () => {
     const bff = setupFakeBff()
     bff.fail('post', '/proxy/users/api/v1/query', 'Users service unavailable', 503)
+    // The signed-in user is looked up through the same endpoint.
+    const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
     renderRoute('/users')
 
     expect(await screen.findByText(m.usersUnableToLoad())).toBeInTheDocument()
     expect(screen.getByText('Users service unavailable')).toBeInTheDocument()
+    expect(consoleWarn).toHaveBeenCalledWith('Failed to fetch current user (likely not an admin):', expect.any(Error))
   })
 
   describe('permissions', () => {
