@@ -11,18 +11,20 @@ declare global {
 
 const runtime = window.__APP_CONFIG__
 
+// The Docker image writes runtime-config.js with envsubst, which leaves every
+// variable that was not set as an empty string, so empty counts as not set.
 const env = {
   VITE_MAX_USER_GROUPS:
-    runtime?.VITE_MAX_USER_GROUPS ?? import.meta.env.VITE_MAX_USER_GROUPS,
+    runtime?.VITE_MAX_USER_GROUPS || import.meta.env.VITE_MAX_USER_GROUPS,
 
   VITE_BFF_BASE_URL:
-    runtime?.VITE_BFF_BASE_URL ?? import.meta.env.VITE_BFF_BASE_URL,
+    runtime?.VITE_BFF_BASE_URL || import.meta.env.VITE_BFF_BASE_URL,
 
   VITE_MAX_CLIENT_GROUPS:
-    runtime?.VITE_MAX_CLIENT_GROUPS ?? import.meta.env.VITE_MAX_CLIENT_GROUPS,
+    runtime?.VITE_MAX_CLIENT_GROUPS || import.meta.env.VITE_MAX_CLIENT_GROUPS,
 
   VITE_DEFAULT_PAGE_SIZE:
-    runtime?.VITE_DEFAULT_PAGE_SIZE ?? import.meta.env.VITE_DEFAULT_PAGE_SIZE,
+    runtime?.VITE_DEFAULT_PAGE_SIZE || import.meta.env.VITE_DEFAULT_PAGE_SIZE,
 
 }
 
@@ -38,7 +40,7 @@ export const MAX_USER_GROUPS = parsePositiveInt(
   20,
 )
 
-export const BFF_BASE_URL = env.VITE_BFF_BASE_URL ?? "/bff"
+export const BFF_BASE_URL = env.VITE_BFF_BASE_URL || "/bff"
 
 export const MAX_CLIENT_GROUPS = parsePositiveInt(
   env.VITE_MAX_CLIENT_GROUPS,

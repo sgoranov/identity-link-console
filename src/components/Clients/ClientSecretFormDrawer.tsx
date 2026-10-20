@@ -77,9 +77,9 @@ export const ClientSecretFormDrawer = ({
   return (
     <Drawer
       open={open}
-      width={420}
+      size={420}
       title={mode === 'create' ? m.clientSecretsGenerate() : m.clientSecretsEdit()}
-      destroyOnClose
+      destroyOnHidden
       forceRender
       onClose={onClose}
     >

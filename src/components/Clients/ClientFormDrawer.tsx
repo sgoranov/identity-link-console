@@ -63,14 +63,15 @@ const audienceSchema = z
   .string()
   .min(1, m.validationAudienceRequired())
   .max(3000, m.validationAudienceMaxLength())
-  .url(m.validationAudienceHttpsUrl())
+  .url(m.validationAudienceHttpUrl())
   .refine((value) => {
     try {
-      return new URL(value).protocol === 'https:'
+      const protocol = new URL(value).protocol
+      return protocol === 'http:' || protocol === 'https:'
     } catch {
       return false
     }
-  }, m.validationAudienceHttpsUrl())
+  }, m.validationAudienceHttpUrl())
 
 const redirectUriSchema = z
   .array(
@@ -86,7 +87,7 @@ const redirectUriSchema = z
 const uriSchema = z.preprocess(
   (value) => value === '' ? undefined : value,
   z.string()
-    .max(3000, m.validationRedirectUriMaxLength())
+    .max(3000, m.validationUriMaxLength())
     .url(m.validationUriValid())
     .optional()
 );
@@ -144,9 +145,9 @@ export const ClientFormDrawer = ({
   return (
     <Drawer
       open={open}
-      width={520}
+      size={520}
       title={mode === 'create' ? m.clientsCreate() : m.clientsEdit()}
-      destroyOnClose
+      destroyOnHidden
       forceRender
       onClose={onClose}
     >

@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button, Input, Result, Space, Spin, Typography } from 'antd'
 import { useNavigate } from '@tanstack/react-router'
 import { fetchClients, clientsQueryKey } from '../api/clients/fetchClients'
 import { fetchClientGroups, clientGroupsQueryKey } from '../api/clients/fetchGroups'
+import { fetchAllPages } from '../api/fetchAllPages'
 import { createClient } from '../api/clients/createClient'
 import { updateClient } from '../api/clients/updateClient'
 import { deleteClient } from '../api/clients/deleteClient'
@@ -58,6 +59,8 @@ const ClientsPage = () => {
   const clientsQuery = useQuery({
     queryKey: clientsQueryKey(clientsPayload),
     queryFn: () => fetchClients(clientsPayload),
+    // Keep the current results on screen while a new search, order or page loads.
+    placeholderData: keepPreviousData,
   })
 
   const groupsPayload: QueryPayload = {
@@ -68,9 +71,10 @@ const ClientsPage = () => {
     orderBy: { 't.name': 'ASC' },
   }
 
+  // Every group, for client form group selection
   const groupsQuery = useQuery({
-    queryKey: clientGroupsQueryKey(groupsPayload),
-    queryFn: () => fetchClientGroups(groupsPayload),
+    queryKey: [...clientGroupsQueryKey(groupsPayload), 'all'],
+    queryFn: () => fetchAllPages(fetchClientGroups, groupsPayload),
   })
 
   if (clientsQuery.isLoading) {
@@ -133,8 +137,8 @@ const ClientsPage = () => {
       />
       <ClientTable
         clients={clientsQuery.data?.items ?? []}
-        availableGroups={groupsQuery.data?.items ?? []}
-        isLoading={clientsQuery.isLoading || groupsQuery.isLoading}
+        availableGroups={groupsQuery.data ?? []}
+        isLoading={clientsQuery.isLoading || groupsQuery.isLoading || clientsQuery.isPlaceholderData}
         deletingId={deletingId}
         onViewSecrets={hasRole('clients.secrets.read') ? (client) => {
           navigate({ to: '/clients/$clientId/secrets', params: { clientId: client.id } })
@@ -234,7 +238,7 @@ const ClientsPage = () => {
       <ClientFormDrawer
         open={isDrawerOpen}
         mode={drawerMode}
-        availableGroups={groupsQuery.data?.items ?? []}
+        availableGroups={groupsQuery.data ?? []}
         initialValues={selectedClient ?? undefined}
         isSubmitting={isSubmitting}
         onClose={() => setIsDrawerOpen(false)}

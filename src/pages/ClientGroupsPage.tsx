@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useQueries, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button, Input, Result, Space, Spin, Typography } from 'antd'
 import { createClientGroup } from '../api/clients/createGroup'
 import { deleteClientGroup } from '../api/clients/deleteGroup'
@@ -65,6 +65,8 @@ const ClientGroupsPage = () => {
   const groupsQuery = useQuery({
     queryKey: clientGroupsQueryKey(groupsPayload),
     queryFn: () => fetchClientGroups(groupsPayload),
+    // Keep the current results on screen while a new search, order or page loads.
+    placeholderData: keepPreviousData,
   })
 
   const visibleGroups = groupsQuery.data?.items ?? []
@@ -146,7 +148,7 @@ const ClientGroupsPage = () => {
       />
       <GroupTable
         groups={groupsQuery.data?.items ?? []}
-        isLoading={groupsQuery.isLoading}
+        isLoading={groupsQuery.isLoading || groupsQuery.isPlaceholderData}
         deletingId={deletingId}
         groupUserCounts={groupClientCounts}
         groupUserCountsLoading={groupClientCountsLoading}

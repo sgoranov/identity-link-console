@@ -56,9 +56,9 @@ export const GroupFormDrawer = ({
   return (
     <Drawer
       open={open}
-      width={420}
+      size={420}
       title={mode === 'create' ? m.groupsCreate() : m.groupsEdit()}
-      destroyOnClose
+      destroyOnHidden
       forceRender
       onClose={onClose}
     >

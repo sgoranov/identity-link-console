@@ -73,7 +73,8 @@ const ProfilePage = () => {
     (user ? `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() : '')
 
   useEffect(() => {
-    if (!user && !session) return
+    // The form is only rendered for an active session, see below.
+    if (isLoading || !session?.access_token_present) return
 
     form.setFieldsValue({
       firstName: user?.firstName ?? '',
@@ -83,7 +84,7 @@ const ProfilePage = () => {
       passwordConfirm: '',
       twoFaEnabled: Boolean(user?.twoFaEnabled),
     })
-  }, [form, session, user])
+  }, [form, isLoading, session, user])
 
   const handleSubmit = async (values: ProfileFormValues) => {
     if (isSystem) return
@@ -103,7 +104,7 @@ const ProfilePage = () => {
       await queryClient.invalidateQueries({ queryKey: currentUserQueryKey(session?.id) })
       await queryClient.invalidateQueries({ queryKey: sessionQueryKey() })
       notification.success({
-        message: m.profileUpdated(),
+        title: m.profileUpdated(),
         description: m.profileChangesSaved(),
         placement: 'top',
       })

@@ -1,50 +1,57 @@
-import { createRootRouteWithContext, createRoute, lazyRouteComponent, redirect, Outlet } from '@tanstack/react-router'
+import {
+  createRootRouteWithContext,
+  createRoute,
+  lazyRouteComponent,
+  redirect,
+  useRouter,
+  type ErrorComponentProps,
+  type ParsedLocation,
+} from '@tanstack/react-router'
 import type { QueryClient } from '@tanstack/react-query'
-import { Spin, Typography } from 'antd'
+import { Button, Result, Spin, Typography } from 'antd'
+import { UnauthorizedError } from './api/http'
 import { fetchSession, sessionQueryKey } from './api/users/fetchSession'
 import { fetchCurrentUser, currentUserQueryKey } from './api/users/fetchCurrentUser'
 import { hasRole, type Role } from './auth/roles'
 import { m } from './paraglide/messages'
-// Vite dev server can occasionally get into a bad HMR/cached state where it thinks a module
-// doesn't have a default export (even when it does). Importing the namespace avoids a hard
-// ESM linking error that would otherwise blank the page.
-import * as RootLayoutModule from './components/RootLayout'
+import RootLayout from './components/RootLayout'
 
 export type RouterContext = {
   queryClient: QueryClient
 }
 
-const RootLayout =
-  (RootLayoutModule as any).default ??
-  (RootLayoutModule as any).RootLayout
+// Replaces the whole app when the session cannot be verified, e.g. because the
+// BFF is down, and when a page fails to load or render.
+const RootError = ({ error }: ErrorComponentProps) => {
+  const router = useRouter()
 
-if (!RootLayout) {
-  const keys = Object.keys(RootLayoutModule as any)
-  console.error(
-    `RootLayout module had no exports. ` +
-      `This is usually a Vite dev-server cache/transform issue. ` +
-      `Exports: ${keys.length ? keys.join(', ') : '(none)'}`
+  return (
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#f5f6f8',
+      }}
+    >
+      <Result
+        status="error"
+        title={m.layoutErrorTitle()}
+        subTitle={error instanceof Error ? error.message : m.mainUnexpectedError()}
+        extra={
+          // Runs the session check and the page's loading again.
+          <Button type="primary" onClick={() => router.invalidate()}>
+            {m.layoutTryAgain()}
+          </Button>
+        }
+      />
+    </div>
   )
 }
 
 const rootRoute = createRootRouteWithContext<RouterContext>()({
-  // If RootLayout fails to load (e.g. Vite dev-server served an empty module),
-  // fall back to a minimal layout so the app doesn't hard-crash into a blank page.
-  component:
-    RootLayout ??
-    (() => (
-      <div style={{ minHeight: '100vh', padding: 24 }}>
-        <Typography.Title level={4} style={{ marginTop: 0 }}>
-          IdentityLink
-        </Typography.Title>
-        <Typography.Paragraph type="secondary">
-          {m.layoutLoadFailed()}
-        </Typography.Paragraph>
-        <div style={{ marginTop: 16 }}>
-          <Outlet />
-        </div>
-      </div>
-    )),
+  component: RootLayout,
   // This shows a full-page loading state while beforeLoad is running
   pendingComponent: () => (
     <div
@@ -62,6 +69,7 @@ const rootRoute = createRootRouteWithContext<RouterContext>()({
       <Typography.Text type="secondary">{m.layoutVerifyingSession()}</Typography.Text>
     </div>
   ),
+  errorComponent: RootError,
   // Global guard: verify the session and fetch user before rendering the layout
   beforeLoad: async ({ context, location }) => {
     if (location.pathname === '/logout-success') {
@@ -87,6 +95,10 @@ const rootRoute = createRootRouteWithContext<RouterContext>()({
         }
       }
     } catch (error) {
+      // The browser is already on its way to the login page. Keep showing the
+      // pending screen until it gets there, instead of an error.
+      if (error instanceof UnauthorizedError) return new Promise<never>(() => {})
+
       console.error('Session verification failed:', error)
       throw error
     }
@@ -111,7 +123,7 @@ const logoutSuccessRoute = createRoute({
   component: lazyRouteComponent(() => import('./pages/LogoutSuccessPage')),
 })
 
-const requireRole = (role: Role) => async ({ context, location }: { context: RouterContext; location: any }) => {
+const requireRole = (role: Role) => async ({ context, location }: { context: RouterContext; location: ParsedLocation }) => {
   const session = await context.queryClient.ensureQueryData({
     queryKey: sessionQueryKey(),
     queryFn: fetchSession,

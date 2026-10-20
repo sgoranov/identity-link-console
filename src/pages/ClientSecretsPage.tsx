@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button, Input, Result, Space, Spin, Typography } from 'antd'
 import { useParams, useNavigate } from '@tanstack/react-router'
 import {
@@ -45,6 +45,8 @@ const ClientSecretsPage = () => {
   const secretsQuery = useQuery({
     queryKey: clientSecretsQueryKey(clientId, secretsPayload),
     queryFn: () => fetchClientSecrets(clientId, secretsPayload),
+    // Keep the current results on screen while a new search, order or page loads.
+    placeholderData: keepPreviousData,
   })
 
   const clientQuery = useQuery({
@@ -121,7 +123,7 @@ const ClientSecretsPage = () => {
       </div>
       <ClientSecretsTable
         secrets={secretsQuery.data?.items ?? []}
-        isLoading={secretsQuery.isLoading}
+        isLoading={secretsQuery.isLoading || secretsQuery.isPlaceholderData}
         deletingId={deletingId}
         onDelete={hasRole('clients.secrets.delete') ? async (secret) => {
           if (secret.isSystem) {
@@ -197,7 +199,7 @@ const ClientSecretsPage = () => {
           <Typography.Paragraph type="secondary" style={{ marginTop: 4 }}>
             {m.clientSecretsStoreSecurely()}
           </Typography.Paragraph>
-          <Space align="start" direction="vertical" style={{ width: '100%' }}>
+          <Space align="start" orientation="vertical" style={{ width: '100%' }}>
             <Input.Password value={generatedSecret} readOnly />
             <Space>
               <Button

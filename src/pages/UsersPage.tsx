@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useQueries, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button, Input, Result, Select, Space, Typography, Spin } from 'antd'
 import { createUser } from '../api/users/createUser'
 import { deleteUser } from '../api/users/deleteUser'
 import { updateUser } from '../api/users/updateUser'
 import { fetchUsers, usersQueryKey } from '../api/users/fetchUsers'
 import { fetchGroups, groupsQueryKey } from '../api/users/fetchGroups'
+import { fetchAllPages } from '../api/fetchAllPages'
 import { fetchUserGroups, userGroupsQueryKey } from '../api/users/fetchUserGroups'
 import type { QueryPayload } from "../api/types.ts"
 import { UserTable } from "../components/Users/UserTable.tsx"
@@ -23,7 +24,9 @@ const UsersPage = () => {
   const pageSize = DEFAULT_PAGE_SIZE
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [drawerMode, setDrawerMode] = useState<'create' | 'edit'>('create')
-  const [selectedUser, setSelectedUser] = useState<UserFormValues | null>(null)
+  const [selectedUser, setSelectedUser] = useState<
+    (UserFormValues & { id?: string; isSystem?: boolean }) | null
+  >(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [searchInput, setSearchInput] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
@@ -61,6 +64,8 @@ const UsersPage = () => {
   const usersQuery = useQuery({
     queryKey: usersQueryKey(payload),
     queryFn: () => fetchUsers(payload),
+    // Keep the current results on screen while a new search, order or page loads.
+    placeholderData: keepPreviousData,
   })
 
   const { user: currentUser, hasRole } = useUser()
@@ -73,10 +78,10 @@ const UsersPage = () => {
     offset: 0,
   };
 
-  // 2. Groups Query - list for user form group selection
+  // 2. Groups Query - every group, for user form group selection
   const groupsQuery = useQuery({
-    queryKey: groupsQueryKey(groupsPayload),
-    queryFn: () => fetchGroups(groupsPayload),
+    queryKey: [...groupsQueryKey(groupsPayload), 'all'],
+    queryFn: () => fetchAllPages(fetchGroups, groupsPayload),
   })
 
   const users = usersQuery.data?.items ?? []
@@ -100,7 +105,7 @@ const UsersPage = () => {
   const isUserGroupsLoading = userGroupsQueries.some((query) => query.isLoading)
 
   // Safely extract the group list for the lookup table
-  const groupList = groupsQuery.data?.items ?? [];
+  const groupList = groupsQuery.data ?? [];
 
   if (usersQuery.isLoading) {
     return (
@@ -169,7 +174,7 @@ const UsersPage = () => {
         users={users}
         availableGroups={groupList}
         userGroupsByUsername={userGroupsByUsername}
-        isLoading={usersQuery.isLoading || groupsQuery.isLoading || isUserGroupsLoading}
+        isLoading={usersQuery.isLoading || groupsQuery.isLoading || isUserGroupsLoading || usersQuery.isPlaceholderData}
         deletingId={deletingId}
         currentUserId={currentUser?.id}
         sortOrderByField={{
@@ -210,6 +215,8 @@ const UsersPage = () => {
 
           setDrawerMode('edit')
           setSelectedUser({
+            id: user.id,
+            isSystem: user.isSystem,
             username: user.username,
             password: '',
             firstName: user.firstName,
@@ -285,16 +292,15 @@ const UsersPage = () => {
             if (drawerMode === 'create') {
               await createUser(values)
             } else {
-              const targetUser = users.find((user) => user.username === values.username)
-              if (!targetUser) {
+              if (!selectedUser?.id) {
                 throw new Error(m.usersUnableToLocateId())
               }
 
-              if (targetUser.isSystem) {
+              if (selectedUser.isSystem) {
                 throw new Error(m.usersSystemCannotBeEdited())
               }
 
-              await updateUser(targetUser.id, {
+              await updateUser(selectedUser.id, {
                 ...values,
                 password: values.password || undefined,
               })
