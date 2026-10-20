@@ -5,6 +5,7 @@ import {
   redirect,
   useRouter,
   type ErrorComponentProps,
+  type ParsedLocation,
 } from '@tanstack/react-router'
 import type { QueryClient } from '@tanstack/react-query'
 import { Button, Result, Spin, Typography } from 'antd'
@@ -122,7 +123,7 @@ const logoutSuccessRoute = createRoute({
   component: lazyRouteComponent(() => import('./pages/LogoutSuccessPage')),
 })
 
-const requireRole = (role: Role) => async ({ context, location }: { context: RouterContext; location: any }) => {
+const requireRole = (role: Role) => async ({ context, location }: { context: RouterContext; location: ParsedLocation }) => {
   const session = await context.queryClient.ensureQueryData({
     queryKey: sessionQueryKey(),
     queryFn: fetchSession,
