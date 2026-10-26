@@ -1,10 +1,5 @@
 # Identity Link Console
 
-![License](https://img.shields.io/github/license/sgoranov/identity-link-console)
-![Issues](https://img.shields.io/github/issues/sgoranov/identity-link-console)
-[![Tests](https://github.com/sgoranov/identity-link-console/actions/workflows/tests.yml/badge.svg)](https://github.com/sgoranov/identity-link-console/actions/workflows/tests.yml)
-[![Security Audit](https://github.com/sgoranov/identity-link-console/actions/workflows/vulnerability-scan.yml/badge.svg)](https://github.com/sgoranov/identity-link-console/actions/workflows/vulnerability-scan.yml)
-
 Identity Link Console is the administrative UI for managing users, clients, groups, and secrets in the
 Identity Link platform. It provides a single place to configure access, review assignments,
 and manage client credentials.
@@ -160,14 +155,6 @@ src/
 messages/       translations
 docker/         nginx config and the container entrypoint
 ```
-
-## Continuous integration
-
-- **Tests**: lints, builds and runs the tests with coverage on every push and pull request to `main`
-  and `develop`.
-- **Dependency Vulnerability Scan**: runs `npm audit` on pushes to `main` and `develop`, pull requests
-  to `main`, and every Monday.
-- **Docker** and **Docker Develop**: publish the images described in [Docker](#docker).
 
 ## License
 
